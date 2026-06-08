@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "juan_losada",
     "name": "Football AI Insights Pro",
     "slug": "football-ai-insights",
     "version": "1.0.0",
@@ -42,6 +43,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "335fae63-34b2-4daf-bf75-d5ebbd2d5e26"
+      }
     }
   }
 }

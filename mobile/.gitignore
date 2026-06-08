@@ -41,3 +41,8 @@ example
 # generated native folders
 /ios
 /android
+
+# Credenciales de firma (NO subir)
+release.keystore
+*.keystore
+credentials.json
