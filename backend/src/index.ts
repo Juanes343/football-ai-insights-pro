@@ -1,3 +1,4 @@
+import './loadEnv'; // DEBE ir primero: sanea DATABASE_URL/DIRECT_URL antes de Prisma
 import { createServer } from 'http';
 import { createApp } from './app';
 import { config } from './config';
@@ -8,6 +9,11 @@ import { initWebSocket } from './services/websocket.service';
 import { startSchedulers } from './services/scheduler.service';
 
 async function bootstrap() {
+  // ── Diagnóstico de entorno (sin exponer secretos) ─────────
+  const dbUrl = process.env.DATABASE_URL || '';
+  logger.info(`🔎 DATABASE_URL presente: ${!!dbUrl} | empieza con: "${dbUrl.slice(0, 13)}" | longitud: ${dbUrl.length}`);
+  logger.info(`🔎 DIRECT_URL presente: ${!!process.env.DIRECT_URL}`);
+
   // ── Test DB connection ────────────────────────────────────
   await prisma.$connect();
   logger.info('✅ PostgreSQL connected');
