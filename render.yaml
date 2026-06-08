@@ -1,0 +1,101 @@
+# ============================================================
+#  Football AI Insights Pro — Blueprint de despliegue (Render)
+#  Despliega el BACKEND (Node/Express) y el AI SERVICE (Python).
+#  El FRONTEND se despliega aparte en Vercel.
+#  La base de datos es Supabase (PostgreSQL) — externa.
+#  Redis es OPCIONAL (ver REDIS_URL / Upstash en la guía).
+# ============================================================
+
+services:
+  # ─── Backend API (Express + Socket.io) ────────────────────
+  - type: web
+    name: football-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build && npx prisma db push --accept-data-loss
+    startCommand: npm run start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20"
+      # --- Base de datos (Supabase) — pega aquí tus cadenas ---
+      - key: DATABASE_URL      # conexión pooled (puerto 6543, ?pgbouncer=true)
+        sync: false
+      - key: DIRECT_URL        # conexión directa (puerto 5432, para migraciones)
+        sync: false
+      # --- Redis (opcional). Déjalo vacío para funcionar sin caché ---
+      - key: REDIS_URL
+        sync: false
+      # --- JWT ---
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      # --- Frontend / CORS (URL de Vercel) ---
+      - key: FRONTEND_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      # --- AI Service --- (pega la URL pública del servicio football-ai,
+      #     ej: https://football-ai.onrender.com)
+      - key: AI_SERVICE_URL
+        sync: false
+      - key: AI_SERVICE_TOKEN
+        generateValue: true
+      # --- API de fútbol ---
+      - key: API_FOOTBALL_KEY
+        sync: false
+      - key: API_FOOTBALL_BASE
+        value: https://v3.football.api-sports.io
+      # --- Google OAuth (opcional) ---
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
+      # --- Stripe (opcional) ---
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PREMIUM_PRICE_ID
+        sync: false
+      # --- Email SMTP (opcional) ---
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+
+  # ─── AI Service (FastAPI + XGBoost) ───────────────────────
+  - type: web
+    name: football-ai
+    runtime: python
+    rootDir: ai-service
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: MODEL_PATH
+        value: models_saved/xgb_model.joblib
+      # URL pública del backend (para CORS). Ej: https://football-backend.onrender.com
+      - key: BACKEND_URL
+        sync: false

@@ -1,0 +1,456 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Conexión "pooled" (PgBouncer de Supabase, puerto 6543) para la app.
+  url       = env("DATABASE_URL")
+  // Conexión directa (puerto 5432) que Prisma usa para migraciones.
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  PREMIUM
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  PAUSED
+  FINISHED
+  POSTPONED
+  CANCELLED
+  ABANDONED
+}
+
+enum PredictionOutcome {
+  HOME_WIN
+  DRAW
+  AWAY_WIN
+}
+
+enum NotificationType {
+  MATCH_START
+  GOAL
+  HALF_TIME
+  FULL_TIME
+  PREDICTION_RESULT
+  SYSTEM
+}
+
+// ─────────────────────────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────────────────────────
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  name              String
+  avatar            String?
+  passwordHash      String?
+  googleId          String?            @unique
+  role              UserRole           @default(USER)
+  isEmailVerified   Boolean            @default(false)
+  emailVerifyToken  String?
+  resetPasswordToken String?
+  resetPasswordExpiry DateTime?
+  lastLoginAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  subscription      Subscription?
+  predictionHistory PredictionHistory[]
+  favoriteTeams     FavoriteTeam[]
+  favoriteLeagues   FavoriteLeague[]
+  notifications     Notification[]
+  refreshTokens     RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SUBSCRIPTION
+// ─────────────────────────────────────────────────────────────────
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  status               SubscriptionStatus @default(INACTIVE)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// LEAGUES
+// ─────────────────────────────────────────────────────────────────
+
+model League {
+  id          String   @id @default(cuid())
+  externalId  Int      @unique
+  name        String
+  country     String
+  logo        String?
+  flag        String?
+  season      Int
+  isActive    Boolean  @default(true)
+  type        String   @default("League")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  matches         Match[]
+  standings       Standing[]
+  favoriteLeagues FavoriteLeague[]
+  aiMetrics       AILeagueMetrics[]
+
+  @@map("leagues")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// TEAMS
+// ─────────────────────────────────────────────────────────────────
+
+model Team {
+  id           String   @id @default(cuid())
+  externalId   Int      @unique
+  name         String
+  shortName    String?
+  logo         String?
+  country      String?
+  founded      Int?
+  stadium      String?
+  capacity     Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  homeMatches    Match[]    @relation("HomeTeam")
+  awayMatches    Match[]    @relation("AwayTeam")
+  standings      Standing[]
+  playerStats    PlayerStat[]
+  favoriteTeams  FavoriteTeam[]
+
+  @@map("teams")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MATCHES
+// ─────────────────────────────────────────────────────────────────
+
+model Match {
+  id           String      @id @default(cuid())
+  externalId   Int         @unique
+  leagueId     String
+  league       League      @relation(fields: [leagueId], references: [id])
+  homeTeamId   String
+  homeTeam     Team        @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId   String
+  awayTeam     Team        @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  status       MatchStatus @default(SCHEDULED)
+  kickoff      DateTime
+  homeScore    Int?
+  awayScore    Int?
+  halfTimeHome Int?
+  halfTimeAway Int?
+  minute       Int?
+  round        String?
+  venue        String?
+  referee      String?
+  rawData      Json?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  statistics    MatchStatistic?
+  events        MatchEvent[]
+  predictions   Prediction[]
+  lineups       MatchLineup[]
+
+  @@map("matches")
+}
+
+model MatchStatistic {
+  id              String  @id @default(cuid())
+  matchId         String  @unique
+  match           Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  homePossession  Float?
+  awayPossession  Float?
+  homeShotsTotal  Int?
+  awayShotsTotal  Int?
+  homeShotsOnGoal Int?
+  awayShotsOnGoal Int?
+  homeCorners     Int?
+  awayCorners     Int?
+  homeFouls       Int?
+  awayFouls       Int?
+  homeYellow      Int?
+  awayYellow      Int?
+  homeRed         Int?
+  awayRed         Int?
+  homeXg          Float?
+  awayXg          Float?
+  homeOffsides    Int?
+  awayOffsides    Int?
+  homePasses      Int?
+  awayPasses      Int?
+  homePassAccuracy Float?
+  awayPassAccuracy Float?
+  rawStats        Json?
+  updatedAt       DateTime @updatedAt
+
+  @@map("match_statistics")
+}
+
+model MatchEvent {
+  id          String   @id @default(cuid())
+  matchId     String
+  match       Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  minute      Int
+  extraTime   Int?
+  type        String   // GOAL, YELLOW_CARD, RED_CARD, SUBSTITUTION, VAR
+  detail      String?
+  teamId      Int?
+  playerName  String?
+  assistName  String?
+  createdAt   DateTime @default(now())
+
+  @@map("match_events")
+}
+
+model MatchLineup {
+  id          String  @id @default(cuid())
+  matchId     String
+  match       Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId      Int
+  formation   String?
+  playerName  String
+  playerNumber Int?
+  position    String?
+  isStarter   Boolean @default(true)
+
+  @@map("match_lineups")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PREDICTIONS (AI)
+// ─────────────────────────────────────────────────────────────────
+
+model Prediction {
+  id                    String            @id @default(cuid())
+  matchId               String
+  match                 Match             @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  modelVersion          String            @default("1.0.0")
+  homeWinProb           Float
+  drawProb              Float
+  awayWinProb           Float
+  bttsProb              Float?            // Both teams to score
+  over25Prob            Float?            // Over 2.5 goals
+  under25Prob           Float?
+  predictedHomeGoals    Float?
+  predictedAwayGoals    Float?
+  predictedOutcome      PredictionOutcome
+  confidence            Float
+  analysisText          String?           @db.Text
+  featureImportance     Json?
+  // Fuente principal de la predicción: "api" (API-Football) o "model" (nuestro XGBoost)
+  provider              String            @default("model")
+  // Consejo en texto (de la predicción del API)
+  advice                String?           @db.Text
+  // Datos comparativos entre equipos (forma, ataque, defensa, etc. del API)
+  comparison            Json?
+  // Segunda opinión: la predicción de la otra fuente
+  secondOpinion         Json?
+  actualOutcome         PredictionOutcome?
+  wasCorrect            Boolean?
+  confidenceCalibration Float?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  userHistories PredictionHistory[]
+
+  @@unique([matchId, modelVersion])
+  @@map("predictions")
+}
+
+model PredictionHistory {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  predictionId String
+  prediction   Prediction @relation(fields: [predictionId], references: [id], onDelete: Cascade)
+  savedAt      DateTime   @default(now())
+
+  @@unique([userId, predictionId])
+  @@map("prediction_history")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// STANDINGS
+// ─────────────────────────────────────────────────────────────────
+
+model Standing {
+  id          String   @id @default(cuid())
+  leagueId    String
+  league      League   @relation(fields: [leagueId], references: [id])
+  teamId      String
+  team        Team     @relation(fields: [teamId], references: [id])
+  season      Int
+  rank        Int
+  points      Int
+  played      Int
+  won         Int
+  drawn       Int
+  lost        Int
+  goalsFor    Int
+  goalsAgainst Int
+  goalDiff    Int
+  form        String?
+  updatedAt   DateTime @updatedAt
+
+  @@unique([leagueId, teamId, season])
+  @@map("standings")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PLAYER STATS
+// ─────────────────────────────────────────────────────────────────
+
+model PlayerStat {
+  id          String   @id @default(cuid())
+  teamId      String
+  team        Team     @relation(fields: [teamId], references: [id])
+  externalId  Int?
+  name        String
+  position    String?
+  nationality String?
+  age         Int?
+  goals       Int      @default(0)
+  assists     Int      @default(0)
+  yellowCards Int      @default(0)
+  redCards    Int      @default(0)
+  appearances Int      @default(0)
+  isInjured   Boolean  @default(false)
+  isSuspended Boolean  @default(false)
+  injuryDesc  String?
+  returnDate  DateTime?
+  season      Int
+  updatedAt   DateTime @updatedAt
+
+  @@unique([externalId, season])
+  @@map("player_stats")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// AI MODEL METRICS
+// ─────────────────────────────────────────────────────────────────
+
+model AIModelMetrics {
+  id               String   @id @default(cuid())
+  modelVersion     String   @unique
+  totalPredictions Int      @default(0)
+  correctOutcomes  Int      @default(0)
+  accuracy         Float    @default(0)
+  logLoss          Float?
+  brierScore       Float?
+  trainedAt        DateTime?
+  isActive         Boolean  @default(false)
+  metadata         Json?
+  createdAt        DateTime @default(now())
+
+  @@map("ai_model_metrics")
+}
+
+model AILeagueMetrics {
+  id           String   @id @default(cuid())
+  leagueId     String
+  league       League   @relation(fields: [leagueId], references: [id])
+  modelVersion String
+  accuracy     Float
+  sampleSize   Int
+  season       Int
+  updatedAt    DateTime @updatedAt
+
+  @@unique([leagueId, modelVersion, season])
+  @@map("ai_league_metrics")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  sentAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// FAVORITES
+// ─────────────────────────────────────────────────────────────────
+
+model FavoriteTeam {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, teamId])
+  @@map("favorite_teams")
+}
+
+model FavoriteLeague {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leagueId  String
+  league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, leagueId])
+  @@map("favorite_leagues")
+}
