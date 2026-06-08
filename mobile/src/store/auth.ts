@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import { getItem, setItem, deleteItem } from '@/lib/storage';
 import type { User } from '@/types';
 
 const ACCESS_KEY = 'fa_access_token';
@@ -24,18 +24,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setTokens: (access, refresh) => {
     set({ accessToken: access, refreshToken: refresh });
-    SecureStore.setItemAsync(ACCESS_KEY, access).catch(() => {});
-    SecureStore.setItemAsync(REFRESH_KEY, refresh).catch(() => {});
+    setItem(ACCESS_KEY, access).catch(() => {});
+    setItem(REFRESH_KEY, refresh).catch(() => {});
   },
 
   setUser: (user) => set({ user }),
 
   hydrate: async () => {
     try {
-      const [access, refresh] = await Promise.all([
-        SecureStore.getItemAsync(ACCESS_KEY),
-        SecureStore.getItemAsync(REFRESH_KEY),
-      ]);
+      const [access, refresh] = await Promise.all([getItem(ACCESS_KEY), getItem(REFRESH_KEY)]);
       set({ accessToken: access, refreshToken: refresh, hydrated: true });
     } catch {
       set({ hydrated: true });
@@ -45,8 +42,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     set({ accessToken: null, refreshToken: null, user: null });
     await Promise.all([
-      SecureStore.deleteItemAsync(ACCESS_KEY).catch(() => {}),
-      SecureStore.deleteItemAsync(REFRESH_KEY).catch(() => {}),
+      deleteItem(ACCESS_KEY).catch(() => {}),
+      deleteItem(REFRESH_KEY).catch(() => {}),
     ]);
   },
 }));
