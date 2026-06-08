@@ -35,15 +35,26 @@ export function createApp(): Application {
     crossOriginEmbedderPolicy: false,
   }));
 
-  // Orígenes permitidos: lista de CORS_ORIGINS + cualquier preview *.vercel.app
+  // Orígenes permitidos: lista de CORS_ORIGINS + previews *.vercel.app + locales (dev)
   const allowedOrigins = new Set(config.app.corsOrigins);
+  const isAllowedOrigin = (origin: string): boolean => {
+    try {
+      const host = new URL(origin).hostname;
+      const isLocal =
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        /^192\.168\./.test(host) ||
+        /^10\./.test(host);
+      return allowedOrigins.has(origin) || isLocal || /\.vercel\.app$/.test(host);
+    } catch {
+      return false;
+    }
+  };
   app.use(cors({
     origin: (origin, callback) => {
       // Permitir peticiones sin origen (apps móviles, curl, healthchecks)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.has(origin) || /\.vercel\.app$/.test(new URL(origin).hostname)) {
-        return callback(null, true);
-      }
+      if (isAllowedOrigin(origin)) return callback(null, true);
       return callback(new Error(`Origen no permitido por CORS: ${origin}`));
     },
     credentials: true,
