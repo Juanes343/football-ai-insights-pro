@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { useMatch } from '@/hooks/useMatches';
 import { useMatchPrediction } from '@/hooks/usePredictions';
 import { PredictionCard } from '@/components/PredictionCard';
+import { MarketsList } from '@/components/Markets';
 import { Card, Loading, Empty, Muted } from '@/components/ui';
 import { theme, statusLabel } from '@/lib/theme';
 
@@ -47,9 +48,31 @@ export default function MatchDetail() {
         )}
 
         {prediction.isLoading ? (
-          <Loading label="Generando predicción…" />
+          <Loading label="Analizando partido…" />
         ) : prediction.data ? (
-          <PredictionCard prediction={prediction.data} />
+          <>
+            {/* Análisis general */}
+            {prediction.data.analysis ? (
+              <Card>
+                <Text style={styles.sectionTitle}>🧠 Análisis general</Text>
+                <Text style={styles.analysis}>{prediction.data.analysis}</Text>
+              </Card>
+            ) : null}
+
+            {/* Mercados / pronósticos */}
+            {prediction.data.markets && prediction.data.markets.length > 0 ? (
+              <View>
+                <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>📊 Pronósticos</Text>
+                <MarketsList markets={prediction.data.markets} />
+                <Muted style={{ fontSize: 11, marginTop: 12, textAlign: 'center' }}>
+                  Las probabilidades son estimadas por IA y pueden variar.
+                </Muted>
+              </View>
+            ) : null}
+
+            {/* Detalle del modelo (1X2, marcador, 2ª opinión) */}
+            <PredictionCard prediction={prediction.data} />
+          </>
         ) : (
           <Card><Empty>Sin predicción disponible.</Empty></Card>
         )}
@@ -76,4 +99,6 @@ const styles = StyleSheet.create({
   teamName: { color: theme.colors.text, fontSize: 14, fontWeight: '600', textAlign: 'center' },
   scoreMid: { alignItems: 'center', paddingHorizontal: 8 },
   score: { color: theme.colors.text, fontSize: 32, fontWeight: '800' },
+  sectionTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
+  analysis: { color: theme.colors.text, fontSize: 14, lineHeight: 21, marginTop: 8 },
 });

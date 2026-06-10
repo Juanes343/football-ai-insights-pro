@@ -76,6 +76,18 @@ export interface PredictionComparison {
   total?: { home: string; away: string };
 }
 
+export type MarketGroup = 'Resultado' | 'Goles' | 'Córners' | 'Faltas' | 'Tarjetas' | 'Remates';
+
+export interface Market {
+  key: string;
+  group: MarketGroup;
+  label: string;
+  probability: number;
+  risk: 'Bajo' | 'Medio' | 'Alto';
+  odds: number;
+  explanation: string;
+}
+
 export interface Prediction {
   id: string;
   matchId: string;
@@ -93,6 +105,8 @@ export interface Prediction {
   advice?: string | null;
   comparison?: PredictionComparison | null;
   secondOpinion?: SecondOpinion | null;
+  analysis?: string | null;
+  markets?: Market[];
   createdAt: string;
   match?: Pick<Match, 'id' | 'externalId' | 'homeTeam' | 'awayTeam' | 'startTime' | 'status' | 'homeScore' | 'awayScore'>;
 }
