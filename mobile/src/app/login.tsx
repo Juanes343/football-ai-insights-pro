@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link } from 'expo-router';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
 import { apiErrorMessage } from '@/lib/api';
 import { theme } from '@/lib/theme';
-import { Brand } from '@/components/Brand';
+
+const LOGO = require('../../assets/images/logo.png');
 
 export default function Login() {
   const { loginMutation } = useAuth();
@@ -17,7 +19,7 @@ export default function Login() {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
         <View style={styles.brandWrap}>
-          <Brand size={30} />
+          <Image source={LOGO} style={styles.logoImg} contentFit="contain" />
           <Text style={styles.tagline}>Análisis profesional de fútbol con IA</Text>
         </View>
         <Text style={styles.title}>Iniciar sesión</Text>
@@ -69,7 +71,8 @@ export default function Login() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.bg },
   container: { flex: 1, justifyContent: 'center', padding: 24 },
-  brandWrap: { alignItems: 'center', marginBottom: 24, gap: 8 },
+  brandWrap: { alignItems: 'center', marginBottom: 24, gap: 10 },
+  logoImg: { width: 168, height: 168, borderRadius: 28 },
   tagline: { color: theme.colors.muted, fontSize: 12 },
   title: { color: theme.colors.text, fontSize: 22, fontWeight: '800', textAlign: 'center' },
   subtitle: { color: theme.colors.muted, fontSize: 13, textAlign: 'center', marginBottom: 20 },

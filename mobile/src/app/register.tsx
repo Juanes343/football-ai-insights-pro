@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link } from 'expo-router';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
 import { apiErrorMessage } from '@/lib/api';
 import { theme } from '@/lib/theme';
-import { Brand } from '@/components/Brand';
+
+const LOGO = require('../../assets/images/logo.png');
 
 export default function Register() {
   const { registerMutation } = useAuth();
@@ -18,7 +20,7 @@ export default function Register() {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
         <View style={styles.brandWrap}>
-          <Brand size={28} />
+          <Image source={LOGO} style={styles.logoImg} contentFit="contain" />
         </View>
         <Text style={styles.title}>Crear cuenta</Text>
         <Text style={styles.subtitle}>Comienza tu experiencia con ProSoccer AI</Text>
@@ -56,7 +58,8 @@ export default function Register() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.bg },
   container: { flex: 1, justifyContent: 'center', padding: 24 },
-  brandWrap: { alignItems: 'center', marginBottom: 16 },
+  brandWrap: { alignItems: 'center', marginBottom: 12 },
+  logoImg: { width: 96, height: 96, borderRadius: 18 },
   title: { color: theme.colors.text, fontSize: 22, fontWeight: '800', textAlign: 'center' },
   subtitle: { color: theme.colors.muted, fontSize: 13, textAlign: 'center', marginBottom: 20 },
   label: { color: theme.colors.muted, fontSize: 13, marginBottom: 6, marginTop: 12 },
