@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Pla
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
+import { apiErrorMessage } from '@/lib/api';
 import { theme } from '@/lib/theme';
 
 export default function Register() {
@@ -25,7 +26,7 @@ export default function Register() {
         <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry placeholder="Mín. 8 caracteres" placeholderTextColor={theme.colors.muted} />
 
         {registerMutation.isError ? (
-          <Text style={styles.error}>{(registerMutation.error as Error)?.message ?? 'No se pudo crear la cuenta'}</Text>
+          <Text style={styles.error}>{apiErrorMessage(registerMutation.error, 'No se pudo crear la cuenta')}</Text>
         ) : null}
 
         <Pressable

@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Pla
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
+import { apiErrorMessage } from '@/lib/api';
 import { theme } from '@/lib/theme';
 import { APP_NAME } from '@/lib/config';
 
@@ -41,7 +42,7 @@ export default function Login() {
         />
 
         {loginMutation.isError ? (
-          <Text style={styles.error}>{(loginMutation.error as Error)?.message ?? 'Credenciales inválidas'}</Text>
+          <Text style={styles.error}>{apiErrorMessage(loginMutation.error, 'Credenciales inválidas')}</Text>
         ) : null}
 
         <Pressable
