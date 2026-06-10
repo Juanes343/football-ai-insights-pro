@@ -33,6 +33,39 @@ export function useTodayPredictions() {
   });
 }
 
+export interface ResultItem {
+  externalId: number;
+  home: string;
+  away: string;
+  homeLogo: string | null;
+  awayLogo: string | null;
+  league: string;
+  homeScore: number;
+  awayScore: number;
+  predicted: 'HOME_WIN' | 'DRAW' | 'AWAY_WIN';
+  actual: 'HOME_WIN' | 'DRAW' | 'AWAY_WIN';
+  correct: boolean;
+  confidence: number;
+}
+export interface DayResults {
+  date: string;
+  total: number;
+  correct: number;
+  accuracy: number;
+  items: ResultItem[];
+}
+
+export function useResults(date: string) {
+  return useQuery<DayResults>({
+    queryKey: ['results', date],
+    queryFn: async () => {
+      const { data } = await api.get<ApiResponse<DayResults>>(`/predictions/results/${date}`);
+      return data.data;
+    },
+    staleTime: 15 * 60_000,
+  });
+}
+
 export function useWorldCup() {
   return useQuery<WorldCupGroup[]>({
     queryKey: ['worldcup'],
