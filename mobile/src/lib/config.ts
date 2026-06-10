@@ -12,4 +12,4 @@
 export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000/api';
 
-export const APP_NAME = 'Football AI Insights Pro';
+export const APP_NAME = 'ProSoccer AI';

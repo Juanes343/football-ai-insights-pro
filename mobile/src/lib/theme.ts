@@ -1,21 +1,31 @@
-/** Tema oscuro de la app (coherente con la versión web). */
+/** Tema "ProSoccer AI": navy profundo + azul cian eléctrico + dorado. */
 export const theme = {
   colors: {
-    bg: '#0a0b0d',
-    card: '#16181d',
-    cardAlt: '#1d2026',
-    border: '#262a31',
-    text: '#f5f6f7',
-    muted: '#9aa0a6',
-    primary: '#22c55e',
-    primaryDim: 'rgba(34,197,94,0.15)',
-    green: '#22c55e',
-    yellow: '#eab308',
+    bg: '#070b14',
+    bgElevated: '#0c1424',
+    card: '#101a2e',
+    cardAlt: '#16233d',
+    border: '#22304f',
+    text: '#f3f7ff',
+    muted: '#8d9bbd',
+    primary: '#22c8f5',      // cian eléctrico (acción principal)
+    primaryDim: 'rgba(34,200,245,0.15)',
+    gold: '#f3b829',         // dorado (valor / destacado)
+    goldDim: 'rgba(243,184,41,0.15)',
+    green: '#2fd27a',
+    yellow: '#f3b829',
     blue: '#3b82f6',
-    red: '#ef4444',
-    danger: '#ef4444',
+    red: '#ff5470',
+    danger: '#ff5470',
+    onPrimary: '#04121c',
   },
-  radius: { sm: 8, md: 12, lg: 16, full: 999 },
+  // Degradados (para expo-linear-gradient)
+  gradients: {
+    brand: ['#22c8f5', '#1f6fe0'] as [string, string],
+    gold: ['#f3b829', '#e0892a'] as [string, string],
+    card: ['#101a2e', '#0b1322'] as [string, string],
+  },
+  radius: { sm: 8, md: 12, lg: 16, xl: 22, full: 999 },
   space: (n: number) => n * 4,
 };
 
@@ -25,7 +35,7 @@ export function outcomeColor(outcome: string): string {
     case 'HOME_WIN':
       return theme.colors.green;
     case 'DRAW':
-      return theme.colors.yellow;
+      return theme.colors.gold;
     case 'AWAY_WIN':
       return theme.colors.blue;
     default:

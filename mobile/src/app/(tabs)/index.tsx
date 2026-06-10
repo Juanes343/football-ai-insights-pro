@@ -39,7 +39,7 @@ export default function Panel() {
           label="Aciertos ayer"
           value={acc ? acc.correct : '—'}
           sub={acc && acc.total > 0 ? `de ${acc.total} · ${Math.round(acc.accuracy * 100)}%` : undefined}
-          color={theme.colors.primary}
+          color={theme.colors.gold}
         />
         <Stat label="Pronósticos" value={top.data?.length ?? '—'} color={theme.colors.blue} />
       </View>

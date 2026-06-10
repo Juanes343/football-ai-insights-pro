@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
 import { apiErrorMessage } from '@/lib/api';
 import { theme } from '@/lib/theme';
-import { APP_NAME } from '@/lib/config';
+import { Brand } from '@/components/Brand';
 
 export default function Login() {
   const { loginMutation } = useAuth();
@@ -15,11 +16,12 @@ export default function Login() {
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
-        <View style={styles.logo}>
-          <Text style={styles.logoText}>⚽</Text>
+        <View style={styles.brandWrap}>
+          <Brand size={30} />
+          <Text style={styles.tagline}>Análisis profesional de fútbol con IA</Text>
         </View>
         <Text style={styles.title}>Iniciar sesión</Text>
-        <Text style={styles.subtitle}>Ingresa a tu cuenta de {APP_NAME}</Text>
+        <Text style={styles.subtitle}>Ingresa a tu cuenta</Text>
 
         <Text style={styles.label}>Correo electrónico</Text>
         <TextInput
@@ -46,11 +48,13 @@ export default function Login() {
         ) : null}
 
         <Pressable
-          style={({ pressed }) => [styles.button, pressed && { opacity: 0.8 }]}
           disabled={loginMutation.isPending}
           onPress={() => loginMutation.mutate({ email, password })}
+          style={({ pressed }) => [pressed && { opacity: 0.85 }]}
         >
-          <Text style={styles.buttonText}>{loginMutation.isPending ? 'Ingresando…' : 'Iniciar sesión'}</Text>
+          <LinearGradient colors={theme.gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.button}>
+            <Text style={styles.buttonText}>{loginMutation.isPending ? 'Ingresando…' : 'Iniciar sesión'}</Text>
+          </LinearGradient>
         </Pressable>
 
         <View style={styles.footer}>
@@ -65,15 +69,15 @@ export default function Login() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.bg },
   container: { flex: 1, justifyContent: 'center', padding: 24 },
-  logo: { alignSelf: 'center', width: 56, height: 56, borderRadius: 16, backgroundColor: theme.colors.primaryDim, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  logoText: { fontSize: 28 },
-  title: { color: theme.colors.text, fontSize: 24, fontWeight: '800', textAlign: 'center' },
-  subtitle: { color: theme.colors.muted, fontSize: 13, textAlign: 'center', marginBottom: 24 },
+  brandWrap: { alignItems: 'center', marginBottom: 24, gap: 8 },
+  tagline: { color: theme.colors.muted, fontSize: 12 },
+  title: { color: theme.colors.text, fontSize: 22, fontWeight: '800', textAlign: 'center' },
+  subtitle: { color: theme.colors.muted, fontSize: 13, textAlign: 'center', marginBottom: 20 },
   label: { color: theme.colors.muted, fontSize: 13, marginBottom: 6, marginTop: 12 },
-  input: { backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, paddingHorizontal: 14, paddingVertical: 12, color: theme.colors.text },
+  input: { backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, paddingHorizontal: 14, paddingVertical: 13, color: theme.colors.text },
   error: { color: theme.colors.danger, fontSize: 13, marginTop: 12 },
-  button: { backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, paddingVertical: 14, alignItems: 'center', marginTop: 20 },
-  buttonText: { color: '#04210f', fontSize: 15, fontWeight: '700' },
+  button: { borderRadius: theme.radius.md, paddingVertical: 15, alignItems: 'center', marginTop: 22 },
+  buttonText: { color: theme.colors.onPrimary, fontSize: 15, fontWeight: '800' },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
   muted: { color: theme.colors.muted, fontSize: 13 },
   link: { color: theme.colors.primary, fontSize: 13, fontWeight: '600' },
