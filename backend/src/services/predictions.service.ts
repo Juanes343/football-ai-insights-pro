@@ -2,6 +2,8 @@ import { prisma } from '../db/prisma';
 import { aiService } from './ai.service';
 import { matchesService } from './matches.service';
 import { apiFootballService } from './apiFootball.service';
+import { teamStatsService } from './teamStats.service';
+import { buildMarkets } from './markets.service';
 import { cacheService } from './cache.service';
 import { logger } from '../utils/logger';
 import { PredictionOutcome } from '@prisma/client';
@@ -151,6 +153,38 @@ class PredictionsService {
 
     await cacheService.set(cacheKey, prediction, 3600);
     return prediction;
+  }
+
+  /** Predicción del partido enriquecida con mercados (córners, faltas, tarjetas, etc.) y análisis. */
+  async getPredictionWithMarkets(fixtureId: number) {
+    const prediction = await this.getPredictionForMatch(fixtureId);
+    if (!prediction) return null;
+    const serialized = serializePrediction(prediction);
+
+    try {
+      const matchData = await matchesService.getMatchById(fixtureId);
+      if (matchData?.homeTeam && serialized.expectedHomeGoals != null) {
+        const [home, away] = await Promise.all([
+          teamStatsService.getTeamProfile(matchData.homeTeam.externalId),
+          teamStatsService.getTeamProfile(matchData.awayTeam.externalId),
+        ]);
+        const { analysis, markets } = buildMarkets({
+          homeName: matchData.homeTeam.name,
+          awayName: matchData.awayTeam.name,
+          homeWinProb: serialized.homeWinProb,
+          drawProb: serialized.drawProb,
+          awayWinProb: serialized.awayWinProb,
+          homeXg: serialized.expectedHomeGoals ?? 1.2,
+          awayXg: serialized.expectedAwayGoals ?? 1.0,
+          home,
+          away,
+        });
+        return { ...serialized, markets, analysis };
+      }
+    } catch (err) {
+      logger.warn('No se pudieron construir los mercados:', err);
+    }
+    return serialized;
   }
 
   /** Determina el resultado (enum) a partir de las 3 probabilidades. */

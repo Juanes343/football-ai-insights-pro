@@ -6,8 +6,8 @@ import { prisma } from '../db/prisma';
 export async function getPredictionForMatch(req: Request, res: Response, next: NextFunction) {
   try {
     const matchId = parseInt(req.params.matchId);
-    const prediction = await predictionsService.getPredictionForMatch(matchId);
-    res.json({ success: true, data: serializePrediction(prediction) });
+    const prediction = await predictionsService.getPredictionWithMarkets(matchId);
+    res.json({ success: true, data: prediction });
   } catch (err) { next(err); }
 }
 
