@@ -155,6 +155,71 @@ class PredictionsService {
     return prediction;
   }
 
+  /**
+   * Evalúa los partidos finalizados de una fecha: compara nuestra predicción guardada
+   * con el resultado real, marca acierto/fallo en la BD y devuelve el resumen.
+   */
+  async evaluateDate(date: string) {
+    const matches = (await matchesService.getMatchesByDate(date)) as any[];
+    const finished = (Array.isArray(matches) ? matches : []).filter(
+      (m) => m.status === 'FINISHED' && m.homeScore != null && m.awayScore != null,
+    );
+    const ids = finished.map((m) => m.externalId).filter(Boolean);
+    if (ids.length === 0) return { date, total: 0, correct: 0, accuracy: 0, items: [] as any[] };
+
+    const preds = await prisma.prediction.findMany({
+      where: { match: { externalId: { in: ids } } },
+      include: { match: { include: { homeTeam: true, awayTeam: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    const predByExt = new Map<number, any>();
+    for (const p of preds) {
+      const ext = (p as any).match?.externalId;
+      if (ext != null && !predByExt.has(ext)) predByExt.set(ext, p);
+    }
+
+    let correct = 0;
+    const items: any[] = [];
+    for (const m of finished) {
+      const p = predByExt.get(m.externalId);
+      if (!p) continue;
+      const actual =
+        m.homeScore > m.awayScore ? 'HOME_WIN' : m.homeScore === m.awayScore ? 'DRAW' : 'AWAY_WIN';
+      const ok = p.predictedOutcome === actual;
+      if (ok) correct++;
+      prisma.prediction
+        .update({ where: { id: p.id }, data: { actualOutcome: actual as any, wasCorrect: ok } })
+        .catch(() => {});
+      items.push({
+        externalId: m.externalId,
+        home: m.homeTeam.name,
+        away: m.awayTeam.name,
+        homeLogo: m.homeTeam.logo,
+        awayLogo: m.awayTeam.logo,
+        league: m.league?.name,
+        homeScore: m.homeScore,
+        awayScore: m.awayScore,
+        predicted: p.predictedOutcome,
+        actual,
+        correct: ok,
+        confidence: p.confidence,
+      });
+    }
+    const total = items.length;
+    return { date, total, correct, accuracy: total > 0 ? correct / total : 0, items };
+  }
+
+  /** Resumen de aciertos de ayer (para el home). */
+  async getAccuracySummary() {
+    const y = new Date();
+    y.setDate(y.getDate() - 1);
+    const date = y.toISOString().slice(0, 10);
+    const yest = await this.evaluateDate(date);
+    return {
+      yesterday: { date, correct: yest.correct, total: yest.total, accuracy: yest.accuracy },
+    };
+  }
+
   /** Predicción del partido enriquecida con mercados (córners, faltas, tarjetas, etc.) y análisis. */
   async getPredictionWithMarkets(fixtureId: number) {
     const prediction = await this.getPredictionForMatch(fixtureId);

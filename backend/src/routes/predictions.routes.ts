@@ -9,6 +9,8 @@ router.get('/match/:matchId', predictionLimiter, ctrl.getPredictionForMatch);
 router.get('/today', ctrl.getTodayPredictions);
 router.get('/top', ctrl.getTopPredictions);
 router.get('/worldcup', ctrl.getWorldCup);
+router.get('/accuracy', ctrl.getAccuracy);
+router.get('/results/:date', ctrl.getResultsByDate);
 router.get('/history', authenticate, ctrl.getPredictionHistory);
 router.get('/model-metrics', ctrl.getModelMetrics);
 

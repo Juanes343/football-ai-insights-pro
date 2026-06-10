@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { predictionsService, serializePrediction } from '../services/predictions.service';
 import { AuthRequest } from '../middleware/auth';
+import { AppError } from '../middleware/errorHandler';
 import { prisma } from '../db/prisma';
 
 export async function getPredictionForMatch(req: Request, res: Response, next: NextFunction) {
@@ -55,6 +56,22 @@ export async function getAdvancedPrediction(req: AuthRequest, res: Response, nex
     const matchId = parseInt(req.params.matchId);
     const prediction = await predictionsService.getAdvancedPrediction(matchId);
     res.json({ success: true, data: prediction });
+  } catch (err) { next(err); }
+}
+
+export async function getResultsByDate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { date } = req.params;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new AppError('Fecha inválida. Usa YYYY-MM-DD', 400);
+    const data = await predictionsService.evaluateDate(date);
+    res.json({ success: true, data });
+  } catch (err) { next(err); }
+}
+
+export async function getAccuracy(_req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await predictionsService.getAccuracySummary();
+    res.json({ success: true, data });
   } catch (err) { next(err); }
 }
 
