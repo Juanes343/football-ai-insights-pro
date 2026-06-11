@@ -14,7 +14,7 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: theme.colors.bg },
         headerShadowVisible: false,
         headerTintColor: theme.colors.text,
-        headerTitle: () => <Brand size={18} />,
+        headerTitle: () => <Brand size={20} />,
         headerTitleAlign: 'center',
         headerRight: () => (
           <MaterialCommunityIcons name="crown" size={20} color={theme.colors.gold} style={{ marginRight: 16 }} />

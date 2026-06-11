@@ -11,7 +11,7 @@ export function Brand({ size = 18, mark = true }: { size?: number; mark?: boolea
       {mark ? (
         <Image
           source={LOGO}
-          style={{ width: size * 1.7, height: size * 1.7, borderRadius: size * 0.45 }}
+          style={{ width: size * 2.4, height: size * 2.4, borderRadius: size * 0.5 }}
           contentFit="contain"
         />
       ) : null}
