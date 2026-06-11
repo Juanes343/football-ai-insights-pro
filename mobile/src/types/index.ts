@@ -12,6 +12,7 @@ export interface User {
   role: UserRole;
   emailVerified: boolean;
   createdAt: string;
+  isPremium?: boolean;
 }
 
 export interface AuthTokens {
@@ -107,6 +108,9 @@ export interface Prediction {
   secondOpinion?: SecondOpinion | null;
   analysis?: string | null;
   markets?: Market[];
+  locked?: boolean;
+  premium?: boolean;
+  freeRemaining?: number;
   createdAt: string;
   match?: Pick<Match, 'id' | 'externalId' | 'homeTeam' | 'awayTeam' | 'startTime' | 'status' | 'homeScore' | 'awayScore'>;
 }

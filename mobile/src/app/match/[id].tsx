@@ -6,6 +6,7 @@ import { useMatch } from '@/hooks/useMatches';
 import { useMatchPrediction } from '@/hooks/usePredictions';
 import { PredictionCard } from '@/components/PredictionCard';
 import { MarketsList } from '@/components/Markets';
+import { PaywallCard } from '@/components/Paywall';
 import { NeuralBg } from '@/components/NeuralBg';
 import { ConfidenceRing, ProbBars1X2, TrendChart } from '@/components/Charts';
 import { Card, Loading, Empty, Muted } from '@/components/ui';
@@ -98,26 +99,37 @@ export default function MatchDetail() {
               );
             })()}
 
-            {/* Análisis general */}
-            {prediction.data.analysis ? (
-              <Card>
-                <Text style={styles.sectionTitle}>🧠 Análisis general</Text>
-                <Text style={styles.analysis}>{prediction.data.analysis}</Text>
-              </Card>
-            ) : null}
+            {/* Contenido premium: análisis + mercados (o paywall) */}
+            {prediction.data.locked ? (
+              <PaywallCard />
+            ) : (
+              <>
+                {prediction.data.analysis ? (
+                  <Card>
+                    <Text style={styles.sectionTitle}>🧠 Análisis general</Text>
+                    <Text style={styles.analysis}>{prediction.data.analysis}</Text>
+                  </Card>
+                ) : null}
 
-            {/* Mercados / pronósticos */}
-            {prediction.data.markets && prediction.data.markets.length > 0 ? (
-              <View>
-                <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>📊 Pronósticos</Text>
-                <MarketsList markets={prediction.data.markets} />
-                <Muted style={{ fontSize: 11, marginTop: 12, textAlign: 'center' }}>
-                  Las probabilidades son estimadas por IA y pueden variar.
-                </Muted>
-              </View>
-            ) : null}
+                {prediction.data.markets && prediction.data.markets.length > 0 ? (
+                  <View>
+                    <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>📊 Pronósticos</Text>
+                    <MarketsList markets={prediction.data.markets} />
+                    <Muted style={{ fontSize: 11, marginTop: 12, textAlign: 'center' }}>
+                      Las probabilidades son estimadas por IA y pueden variar.
+                    </Muted>
+                  </View>
+                ) : null}
 
-            {/* Detalle del modelo (1X2, marcador, 2ª opinión) */}
+                {!prediction.data.premium && prediction.data.freeRemaining != null ? (
+                  <Text style={styles.freeNote}>
+                    👁️ Te quedan {prediction.data.freeRemaining} pronósticos completos gratis hoy.
+                  </Text>
+                ) : null}
+              </>
+            )}
+
+            {/* Detalle del modelo (1X2, marcador, 2ª opinión) — básico, siempre visible */}
             <PredictionCard prediction={prediction.data} />
           </>
         ) : (
@@ -155,4 +167,5 @@ const styles = StyleSheet.create({
   score: { color: theme.colors.text, fontSize: 32, fontWeight: '800' },
   sectionTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
   analysis: { color: theme.colors.text, fontSize: 14, lineHeight: 21, marginTop: 8 },
+  freeNote: { color: theme.colors.gold, fontSize: 12, textAlign: 'center', fontWeight: '600' },
 });
