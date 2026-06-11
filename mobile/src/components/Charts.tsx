@@ -10,13 +10,20 @@ export function ConfidenceRing({
   size = 92,
   stroke = 9,
   brain = true,
+  tone = 'auto',
 }: {
   value: number;
   size?: number;
   stroke?: number;
   brain?: boolean;
+  tone?: 'auto' | 'cyan' | 'gold';
 }) {
   const pct = Math.max(0, Math.min(1, value));
+  const gold = tone === 'gold' || (tone === 'auto' && pct >= 0.75);
+  const c1 = gold ? theme.colors.goldDark : theme.colors.primary;
+  const c2 = gold ? theme.colors.gold : theme.colors.neural;
+  const accent = gold ? theme.colors.gold : theme.colors.neural;
+  const gid = gold ? 'psai-ring-gold' : 'psai-ring-cyan';
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const dash = circ * pct;
@@ -25,9 +32,9 @@ export function ConfidenceRing({
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] }}>
         <Defs>
-          <SvgGradient id="psai-ring" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0%" stopColor={theme.colors.primary} />
-            <Stop offset="100%" stopColor={theme.colors.neural} />
+          <SvgGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0%" stopColor={c1} />
+            <Stop offset="100%" stopColor={c2} />
           </SvgGradient>
         </Defs>
         <Circle cx={size / 2} cy={size / 2} r={r} stroke={theme.colors.cardAlt} strokeWidth={stroke} fill="none" />
@@ -35,7 +42,7 @@ export function ConfidenceRing({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke="url(#psai-ring)"
+          stroke={`url(#${gid})`}
           strokeWidth={stroke}
           fill="none"
           strokeDasharray={`${dash} ${circ}`}
@@ -43,8 +50,8 @@ export function ConfidenceRing({
         />
       </Svg>
       <View style={{ alignItems: 'center' }}>
-        {brain ? <MaterialCommunityIcons name="brain" size={size * 0.2} color={theme.colors.neural} /> : null}
-        <Text style={{ color: theme.colors.text, fontSize: size * 0.26, fontWeight: '900' }}>{Math.round(pct * 100)}%</Text>
+        {brain ? <MaterialCommunityIcons name="brain" size={size * 0.2} color={accent} /> : null}
+        <Text style={{ color: accent, fontSize: size * 0.26, fontWeight: '900' }}>{Math.round(pct * 100)}%</Text>
       </View>
     </View>
   );

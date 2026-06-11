@@ -55,7 +55,7 @@ export default function MatchDetail() {
         ) : prediction.data ? (
           <>
             {/* IA Confidence + 1X2 */}
-            <Card accent="cyan">
+            <Card accent={prediction.data.confidence >= 0.75 ? 'gold' : 'cyan'}>
               <View style={styles.confRow}>
                 <ConfidenceRing value={prediction.data.confidence} />
                 <View style={{ flex: 1, gap: 4 }}>

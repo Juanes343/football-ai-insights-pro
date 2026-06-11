@@ -51,7 +51,7 @@ export default function Panel() {
 
       {/* IA Confidence (widget premium) */}
       {top.data && top.data[0] ? (
-        <Card accent="cyan">
+        <Card accent={top.data[0].confidence >= 0.75 ? 'gold' : 'cyan'}>
           <View style={styles.confRow}>
             <ConfidenceRing value={top.data[0].confidence} />
             <View style={{ flex: 1, gap: 4 }}>

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { Brand } from '@/components/Brand';
 
@@ -16,6 +16,9 @@ export default function TabsLayout() {
         headerTintColor: theme.colors.text,
         headerTitle: () => <Brand size={18} />,
         headerTitleAlign: 'center',
+        headerRight: () => (
+          <MaterialCommunityIcons name="crown" size={20} color={theme.colors.gold} style={{ marginRight: 16 }} />
+        ),
         sceneStyle: { backgroundColor: theme.colors.bg },
       }}
     >
