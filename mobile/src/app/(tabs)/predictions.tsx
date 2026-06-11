@@ -52,7 +52,7 @@ function PredRow({ p }: { p: Prediction }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.colors.bg },
+  screen: { flex: 1, backgroundColor: 'transparent' },
   h2: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, padding: 12 },
   match: { color: theme.colors.text, fontSize: 13, fontWeight: '600' },

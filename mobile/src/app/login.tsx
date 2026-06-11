@@ -69,7 +69,7 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.colors.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: { flex: 1, justifyContent: 'center', padding: 24 },
   brandWrap: { alignItems: 'center', marginBottom: 24, gap: 10 },
   logoImg: { width: 168, height: 168, borderRadius: 28 },

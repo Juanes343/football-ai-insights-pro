@@ -56,7 +56,7 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.colors.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: { flex: 1, justifyContent: 'center', padding: 24 },
   brandWrap: { alignItems: 'center', marginBottom: 12 },
   logoImg: { width: 96, height: 96, borderRadius: 18 },

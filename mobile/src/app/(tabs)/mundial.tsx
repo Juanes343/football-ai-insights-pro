@@ -11,6 +11,9 @@ import { theme, outcomeLabel, outcomeColor } from '@/lib/theme';
 import { topScorelines } from '@/lib/scores';
 import type { WorldCupGroup, Match } from '@/types';
 
+/** Fecha LOCAL (yyyy-MM-dd) del partido, para que coincida con la hora mostrada. */
+const localDate = (iso?: string) => (iso ? format(new Date(iso), 'yyyy-MM-dd') : '');
+
 export default function Mundial() {
   const { data, isLoading } = useWorldCup();
   const [query, setQuery] = useState('');
@@ -20,7 +23,8 @@ export default function Mundial() {
   const dates = useMemo(() => {
     const set = new Set<string>();
     allMatches.forEach((m) => {
-      if (m.startTime) set.add(m.startTime.slice(0, 10));
+      const d = localDate(m.startTime);
+      if (d) set.add(d);
     });
     return Array.from(set).sort();
   }, [allMatches]);
@@ -43,7 +47,7 @@ export default function Mundial() {
     return allMatches
       .filter(
         (m) =>
-          m.startTime?.slice(0, 10) === date &&
+          localDate(m.startTime) === date &&
           (!q || m.homeTeam.name.toLowerCase().includes(q) || m.awayTeam.name.toLowerCase().includes(q)),
       )
       .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
@@ -178,7 +182,7 @@ function GroupCard({ group }: { group: WorldCupGroup }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.colors.bg },
+  screen: { flex: 1, backgroundColor: 'transparent' },
   searchBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, paddingHorizontal: 12 },
   searchInput: { flex: 1, color: theme.colors.text, paddingVertical: 10 },
   chips: { gap: 8, paddingRight: 8 },

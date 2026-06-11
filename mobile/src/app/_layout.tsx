@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useHydrateAuth } from '@/hooks/useAuth';
+import { NeuralBg } from '@/components/NeuralBg';
 import { theme } from '@/lib/theme';
 
 export default function RootLayout() {
@@ -21,19 +22,23 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={client}>
           <StatusBar style="light" />
-          <Stack
-            screenOptions={{
-              headerStyle: { backgroundColor: theme.colors.bg },
-              headerTintColor: theme.colors.text,
-              contentStyle: { backgroundColor: theme.colors.bg },
-            }}
-          >
+          <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
+            <NeuralBg />
+            <Stack
+              screenOptions={{
+                headerStyle: { backgroundColor: 'transparent' },
+                headerShadowVisible: false,
+                headerTintColor: theme.colors.text,
+                contentStyle: { backgroundColor: 'transparent' },
+              }}
+            >
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="register" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="match/[id]" options={{ title: 'Partido', presentation: 'card' }} />
-          </Stack>
+            </Stack>
+          </View>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
