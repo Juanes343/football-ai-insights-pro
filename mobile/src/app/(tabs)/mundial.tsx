@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useWorldCup } from '@/hooks/usePredictions';
+import { NeuralBg } from '@/components/NeuralBg';
 import { Card, Muted, Loading, Empty } from '@/components/ui';
 import { theme, outcomeLabel, outcomeColor } from '@/lib/theme';
 import { topScorelines } from '@/lib/scores';
@@ -56,7 +57,9 @@ export default function Mundial() {
   if (isLoading) return <View style={styles.screen}><Loading label="Cargando Mundial…" /></View>;
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ padding: 16, gap: 14 }}>
+    <View style={{ flex: 1 }}>
+      <NeuralBg />
+      <ScrollView style={styles.screen} contentContainerStyle={{ padding: 16, gap: 14 }}>
       {/* Buscador */}
       <View style={styles.searchBox}>
         <Ionicons name="search" size={16} color={theme.colors.muted} />
@@ -100,7 +103,8 @@ export default function Mundial() {
       ) : (
         groups.map((g) => <GroupCard key={g.name} group={g} />)
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -182,7 +186,7 @@ function GroupCard({ group }: { group: WorldCupGroup }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.colors.bg },
+  screen: { flex: 1, backgroundColor: 'transparent' },
   searchBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, paddingHorizontal: 12 },
   searchInput: { flex: 1, color: theme.colors.text, paddingVertical: 10 },
   chips: { gap: 8, paddingRight: 8 },

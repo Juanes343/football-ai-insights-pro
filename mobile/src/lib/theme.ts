@@ -1,29 +1,32 @@
-/** Tema "ProSoccer AI": navy profundo + azul cian eléctrico + dorado. */
+/** Tema "ProSoccer AI": negro tecnológico + azul IA/neural + dorado premium. */
 export const theme = {
   colors: {
-    bg: '#07161f',
-    bgElevated: '#0b212c',
-    card: '#0e2734',
-    cardAlt: '#143240',
-    border: '#214252',
-    text: '#f3f7ff',
-    muted: '#8d9bbd',
-    primary: '#22c8f5',      // cian eléctrico (acción principal)
-    primaryDim: 'rgba(34,200,245,0.15)',
-    gold: '#f3b829',         // dorado (valor / destacado)
-    goldDim: 'rgba(243,184,41,0.15)',
-    green: '#2fd27a',
-    yellow: '#f3b829',
-    blue: '#3b82f6',
+    bg: '#05070D',            // negro tecnológico
+    bgElevated: '#0A1F44',    // azul profundo
+    card: 'rgba(10,31,68,0.65)',   // glassmorphism
+    cardAlt: 'rgba(10,31,68,0.45)',
+    border: 'rgba(0,229,255,0.22)', // borde iluminado cian
+    text: '#FFFFFF',
+    muted: '#9fb2cc',         // gris metálico suave
+    primary: '#00B8FF',       // azul IA
+    primaryDim: 'rgba(0,184,255,0.16)',
+    neural: '#00E5FF',        // azul neural
+    gold: '#FFD54A',          // dorado premium
+    goldDark: '#C89B2B',
+    goldDim: 'rgba(255,213,74,0.16)',
+    green: '#2fe39a',
+    yellow: '#FFD54A',
+    blue: '#00B8FF',
     red: '#ff5470',
     danger: '#ff5470',
-    onPrimary: '#04121c',
+    onPrimary: '#04121f',
+    metal: '#D9E3EA',
   },
   // Degradados (para expo-linear-gradient)
   gradients: {
-    brand: ['#22c8f5', '#1f6fe0'] as [string, string],
-    gold: ['#f3b829', '#e0892a'] as [string, string],
-    card: ['#101a2e', '#0b1322'] as [string, string],
+    brand: ['#00B8FF', '#00E5FF'] as [string, string],
+    gold: ['#C89B2B', '#FFD54A'] as [string, string],
+    card: ['#0A1F44', '#05070D'] as [string, string],
   },
   radius: { sm: 8, md: 12, lg: 16, xl: 22, full: 999 },
   space: (n: number) => n * 4,

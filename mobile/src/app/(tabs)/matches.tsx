@@ -6,6 +6,7 @@ import { format, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMatchesByDate } from '@/hooks/useMatches';
 import { MatchCard } from '@/components/MatchCard';
+import { NeuralBg } from '@/components/NeuralBg';
 import { Loading, Empty, Card } from '@/components/ui';
 import { theme } from '@/lib/theme';
 import { translateLeague } from '@/lib/leagues';
@@ -47,10 +48,18 @@ export default function Matches() {
 
   const selectedDate = addDays(new Date(), offset);
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  const nextStr = format(addDays(selectedDate, 1), 'yyyy-MM-dd');
+  // Traemos el día y el siguiente (UTC) y filtramos por fecha LOCAL,
+  // para no perder los partidos de la noche (que en UTC caen al día siguiente).
   const day = useMatchesByDate(dateStr);
+  const dayNext = useMatchesByDate(nextStr);
 
   const groups = useMemo(() => {
-    const list = (day.data ?? []).filter((m) => byQuery(m, query) && byStatus(m, filter));
+    const seen = new Map<number, Match>();
+    [...(day.data ?? []), ...(dayNext.data ?? [])].forEach((m) => seen.set(m.externalId, m));
+    const list = Array.from(seen.values()).filter(
+      (m) => format(new Date(m.startTime), 'yyyy-MM-dd') === dateStr && byQuery(m, query) && byStatus(m, filter),
+    );
     const map = new Map<number, LeagueGroup>();
     for (const m of list) {
       const id = m.league?.externalId ?? 0;
@@ -66,14 +75,16 @@ export default function Matches() {
       .filter((g) => !FEATURED.includes(g.externalId))
       .sort((a, b) => b.matches.length - a.matches.length || a.name.localeCompare(b.name));
     return { featured, rest, total: list.length };
-  }, [day.data, query, filter]);
+  }, [day.data, dayNext.data, dateStr, query, filter]);
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={{ padding: 16, gap: 14 }}
-      refreshControl={<RefreshControl refreshing={day.isRefetching} onRefresh={() => day.refetch()} tintColor={theme.colors.primary} />}
-    >
+    <View style={{ flex: 1 }}>
+      <NeuralBg />
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={{ padding: 16, gap: 14 }}
+        refreshControl={<RefreshControl refreshing={day.isRefetching || dayNext.isRefetching} onRefresh={() => { day.refetch(); dayNext.refetch(); }} tintColor={theme.colors.primary} />}
+      >
       {/* Tira de fechas */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dates}>
         {Array.from({ length: 12 }).map((_, i) => {
@@ -134,7 +145,8 @@ export default function Matches() {
           ) : null}
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -167,7 +179,7 @@ function LeagueGroupRow({ group, defaultOpen }: { group: LeagueGroup; defaultOpe
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.colors.bg },
+  screen: { flex: 1, backgroundColor: 'transparent' },
   dates: { gap: 8, paddingRight: 8 },
   dateChip: { alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.card, minWidth: 58 },
   dateChipActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },

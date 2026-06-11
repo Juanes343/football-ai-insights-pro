@@ -6,6 +6,7 @@ import { useLiveMatches } from '@/hooks/useMatches';
 import { useTopPredictions, useResults, type ResultItem } from '@/hooks/usePredictions';
 import { MatchCard } from '@/components/MatchCard';
 import { PredictionCard } from '@/components/PredictionCard';
+import { NeuralBg } from '@/components/NeuralBg';
 import { Card, Muted, Loading, Empty, SectionTitle, IconBadge } from '@/components/ui';
 import { theme } from '@/lib/theme';
 
@@ -27,11 +28,13 @@ export default function Panel() {
   const acc = results.data;
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={{ padding: 16, gap: 18 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
-    >
+    <View style={{ flex: 1 }}>
+      <NeuralBg />
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={{ padding: 16, gap: 18 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
+      >
       {/* Stats */}
       <View style={styles.stats}>
         <Stat icon="pulse" label="En vivo" value={live.data?.length ?? '—'} color={theme.colors.red} />
@@ -76,7 +79,8 @@ export default function Panel() {
       ) : (
         <Card><Empty>No hay partidos en vivo ahora</Empty></Card>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -128,7 +132,7 @@ function ResultRow({ r }: { r: ResultItem }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.colors.bg },
+  screen: { flex: 1, backgroundColor: 'transparent' },
   stats: { flexDirection: 'row', gap: 10 },
   statCard: { flex: 1, alignItems: 'center', paddingVertical: 14, gap: 6 },
   statValue: { fontSize: 24, fontWeight: '800' },
