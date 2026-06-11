@@ -1,11 +1,11 @@
 /** Tema "ProSoccer AI": navy profundo + azul cian eléctrico + dorado. */
 export const theme = {
   colors: {
-    bg: '#0a1428',
-    bgElevated: '#0f1d3a',
-    card: '#13213f',
-    cardAlt: '#1a2c50',
-    border: '#27395f',
+    bg: '#07161f',
+    bgElevated: '#0b212c',
+    card: '#0e2734',
+    cardAlt: '#143240',
+    border: '#214252',
     text: '#f3f7ff',
     muted: '#8d9bbd',
     primary: '#22c8f5',      // cian eléctrico (acción principal)

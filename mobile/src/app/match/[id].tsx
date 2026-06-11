@@ -91,7 +91,7 @@ function Team({ name, logo }: { name: string; logo: string | null }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: 'transparent' },
+  screen: { flex: 1, backgroundColor: theme.colors.bg },
   status: { color: theme.colors.muted, fontSize: 12, textAlign: 'center', marginBottom: 12 },
   scoreRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   team: { flex: 1, alignItems: 'center', gap: 8 },

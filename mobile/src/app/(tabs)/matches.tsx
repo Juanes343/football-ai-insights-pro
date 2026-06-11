@@ -118,7 +118,7 @@ export default function Matches() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: 'transparent' },
+  screen: { flex: 1, backgroundColor: theme.colors.bg },
   searchBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, paddingHorizontal: 12 },
   searchInput: { flex: 1, color: theme.colors.text, paddingVertical: 10 },
   filters: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },

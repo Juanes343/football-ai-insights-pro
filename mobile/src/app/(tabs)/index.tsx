@@ -128,7 +128,7 @@ function ResultRow({ r }: { r: ResultItem }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: 'transparent' },
+  screen: { flex: 1, backgroundColor: theme.colors.bg },
   stats: { flexDirection: 'row', gap: 10 },
   statCard: { flex: 1, alignItems: 'center', paddingVertical: 14, gap: 6 },
   statValue: { fontSize: 24, fontWeight: '800' },

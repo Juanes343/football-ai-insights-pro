@@ -11,12 +11,12 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: theme.colors.muted,
         tabBarStyle: { backgroundColor: theme.colors.bgElevated, borderTopColor: theme.colors.border, height: 60, paddingBottom: 8, paddingTop: 6 },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        headerStyle: { backgroundColor: 'transparent' },
+        headerStyle: { backgroundColor: theme.colors.bg },
         headerShadowVisible: false,
         headerTintColor: theme.colors.text,
         headerTitle: () => <Brand size={18} />,
         headerTitleAlign: 'center',
-        sceneStyle: { backgroundColor: 'transparent' },
+        sceneStyle: { backgroundColor: theme.colors.bg },
       }}
     >
       <Tabs.Screen
