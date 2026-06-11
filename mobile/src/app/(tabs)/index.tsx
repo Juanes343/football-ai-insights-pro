@@ -7,6 +7,7 @@ import { useTopPredictions, useResults, type ResultItem } from '@/hooks/usePredi
 import { MatchCard } from '@/components/MatchCard';
 import { PredictionCard } from '@/components/PredictionCard';
 import { NeuralBg } from '@/components/NeuralBg';
+import { ConfidenceRing, ProbBars1X2 } from '@/components/Charts';
 import { Card, Muted, Loading, Empty, SectionTitle, IconBadge } from '@/components/ui';
 import { theme } from '@/lib/theme';
 
@@ -47,6 +48,26 @@ export default function Panel() {
         />
         <Stat icon="sparkles" label="Pronósticos" value={top.data?.length ?? '—'} color={theme.colors.primary} />
       </View>
+
+      {/* IA Confidence (widget premium) */}
+      {top.data && top.data[0] ? (
+        <Card accent="cyan">
+          <View style={styles.confRow}>
+            <ConfidenceRing value={top.data[0].confidence} />
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={styles.confTitle}>IA CONFIDENCE</Text>
+              <Muted style={{ fontSize: 11 }}>Confidence score · mejor pronóstico del día</Muted>
+            </View>
+          </View>
+          <View style={styles.divider} />
+          <ProbBars1X2
+            home={top.data[0].homeWinProb}
+            draw={top.data[0].drawProb}
+            away={top.data[0].awayWinProb}
+            predicted={top.data[0].predictedOutcome}
+          />
+        </Card>
+      ) : null}
 
       {/* Mejor pronóstico */}
       <SectionTitle gold>Mejor pronóstico</SectionTitle>
@@ -133,6 +154,9 @@ function ResultRow({ r }: { r: ResultItem }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: 'transparent' },
+  confRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  confTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '900', letterSpacing: 0.5 },
+  divider: { height: 1, backgroundColor: theme.colors.border, marginVertical: 14 },
   stats: { flexDirection: 'row', gap: 10 },
   statCard: { flex: 1, alignItems: 'center', paddingVertical: 14, gap: 6 },
   statValue: { fontSize: 24, fontWeight: '800' },

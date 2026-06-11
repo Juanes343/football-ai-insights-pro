@@ -6,8 +6,10 @@ import { useMatch } from '@/hooks/useMatches';
 import { useMatchPrediction } from '@/hooks/usePredictions';
 import { PredictionCard } from '@/components/PredictionCard';
 import { MarketsList } from '@/components/Markets';
+import { NeuralBg } from '@/components/NeuralBg';
+import { ConfidenceRing, ProbBars1X2 } from '@/components/Charts';
 import { Card, Loading, Empty, Muted } from '@/components/ui';
-import { theme, statusLabel } from '@/lib/theme';
+import { theme, statusLabel, outcomeLabel } from '@/lib/theme';
 
 export default function MatchDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -16,7 +18,8 @@ export default function MatchDetail() {
   const prediction = useMatchPrediction(externalId);
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
+      <NeuralBg />
       <Stack.Screen options={{ title: 'Partido' }} />
       <ScrollView style={styles.screen} contentContainerStyle={{ padding: 16, gap: 16 }}>
         {match.isLoading ? (
@@ -51,6 +54,27 @@ export default function MatchDetail() {
           <Loading label="Analizando partido…" />
         ) : prediction.data ? (
           <>
+            {/* IA Confidence + 1X2 */}
+            <Card accent="cyan">
+              <View style={styles.confRow}>
+                <ConfidenceRing value={prediction.data.confidence} />
+                <View style={{ flex: 1, gap: 4 }}>
+                  <Text style={styles.confTitle}>IA CONFIDENCE</Text>
+                  <Muted style={{ fontSize: 11 }}>Confianza del modelo</Muted>
+                  <View style={styles.predChip}>
+                    <Text style={styles.predChipText}>{outcomeLabel(prediction.data.predictedOutcome)}</Text>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.divider} />
+              <ProbBars1X2
+                home={prediction.data.homeWinProb}
+                draw={prediction.data.drawProb}
+                away={prediction.data.awayWinProb}
+                predicted={prediction.data.predictedOutcome}
+              />
+            </Card>
+
             {/* Análisis general */}
             {prediction.data.analysis ? (
               <Card>
@@ -77,7 +101,7 @@ export default function MatchDetail() {
           <Card><Empty>Sin predicción disponible.</Empty></Card>
         )}
       </ScrollView>
-    </>
+    </View>
   );
 }
 
@@ -91,7 +115,12 @@ function Team({ name, logo }: { name: string; logo: string | null }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.colors.bg },
+  screen: { flex: 1, backgroundColor: 'transparent' },
+  confRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  confTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '900', letterSpacing: 0.5 },
+  predChip: { alignSelf: 'flex-start', marginTop: 4, backgroundColor: theme.colors.primaryDim, borderColor: theme.colors.primary, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
+  predChipText: { color: theme.colors.primary, fontSize: 12, fontWeight: '800' },
+  divider: { height: 1, backgroundColor: theme.colors.border, marginVertical: 14 },
   status: { color: theme.colors.muted, fontSize: 12, textAlign: 'center', marginBottom: 12 },
   scoreRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   team: { flex: 1, alignItems: 'center', gap: 8 },
