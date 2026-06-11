@@ -36,10 +36,6 @@ export default function TabsLayout() {
         options={{ title: 'Predicciones', tabBarIcon: ({ color, size }) => <Ionicons name="analytics-outline" color={color} size={size} /> }}
       />
       <Tabs.Screen
-        name="ligas"
-        options={{ title: 'Ligas', tabBarIcon: ({ color, size }) => <Ionicons name="trophy-outline" color={color} size={size} /> }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{ title: 'Perfil', tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" color={color} size={size} /> }}
       />
