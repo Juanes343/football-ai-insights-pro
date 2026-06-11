@@ -117,6 +117,20 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export interface Standing {
+  rank: number;
+  team: { id: number; name: string; logo: string | null };
+  points: number;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
+  form: string | null;
+}
+
 // Mundial
 export interface GroupRow {
   team: { id: string; name: string; logo: string | null };

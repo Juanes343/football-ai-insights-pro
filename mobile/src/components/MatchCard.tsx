@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { format } from 'date-fns';
 import { theme, statusLabel } from '@/lib/theme';
+import { translateLeague } from '@/lib/leagues';
 import type { Match } from '@/types';
 
 export function MatchCard({ match }: { match: Match }) {
@@ -17,7 +18,7 @@ export function MatchCard({ match }: { match: Match }) {
     >
       <View style={styles.header}>
         <Text style={styles.league} numberOfLines={1}>
-          {match.league?.name}
+          {translateLeague(match.league?.name)}
         </Text>
         <Text style={[styles.status, { color: isLive ? theme.colors.red : theme.colors.muted }]}>
           {isLive && match.minute ? `${match.minute}'` : statusLabel(match.status)}
