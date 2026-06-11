@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import { ScrollView, View, Text, TextInput, Pressable, StyleSheet, Alert, Linking } from 'react-native';
+import { ScrollView, View, Text, Pressable, StyleSheet, Alert, Linking } from 'react-native';
 import { Stack } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NeuralBg } from '@/components/NeuralBg';
-import { Card, GradientButton } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
 import { theme } from '@/lib/theme';
 
@@ -17,15 +16,14 @@ const BENEFITS = [
 ];
 
 const PLANS = [
-  { id: 'weekly', name: 'Semanal', price: '$24.900', period: '/semana' },
-  { id: 'monthly', name: 'Mensual', price: '$59.900', period: '/mes', best: true },
+  { id: 'weekly', name: 'Semanal', price: '$14.900', period: '/semana' },
+  { id: 'monthly', name: 'Mensual', price: '$39.900', period: '/mes', best: true },
 ];
 
 const WHATSAPP = '573000000000'; // TODO: reemplazar por el número real de soporte
 
 export default function Premium() {
   const { user } = useAuth();
-  const [promo, setPromo] = useState('');
   const isPremium = !!user?.isPremium;
 
   const soon = () =>
@@ -59,22 +57,6 @@ export default function Premium() {
               </View>
             </View>
           ))}
-        </Card>
-
-        {/* Código promocional */}
-        <Card>
-          <Text style={styles.cardTitle}>¿Tienes un código promocional?</Text>
-          <View style={styles.promoRow}>
-            <TextInput
-              style={styles.promoInput}
-              value={promo}
-              onChangeText={setPromo}
-              placeholder="Ej: CARLOS10"
-              placeholderTextColor={theme.colors.muted}
-              autoCapitalize="characters"
-            />
-            <GradientButton label="Aplicar" onPress={soon} />
-          </View>
         </Card>
 
         {/* Planes */}
