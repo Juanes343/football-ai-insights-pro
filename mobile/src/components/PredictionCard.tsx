@@ -14,7 +14,7 @@ const COMP_LABELS: Record<keyof PredictionComparison, string> = {
   total: 'Total',
 };
 
-export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
+export function PredictionCard({ prediction: p, accent }: { prediction: Prediction; accent?: 'cyan' | 'gold' }) {
   const isApi = p.provider === 'api';
   const rows = [
     { label: 'Gana local', value: Math.round(p.homeWinProb * 100), color: theme.colors.green },
@@ -27,7 +27,7 @@ export function PredictionCard({ prediction: p }: { prediction: Prediction }) {
       : [];
 
   return (
-    <Card>
+    <Card accent={accent}>
       <View style={styles.headerRow}>
         <Text style={styles.cardTitle}>{isApi ? 'Predicción API-Football' : 'Predicción IA propia'}</Text>
       </View>

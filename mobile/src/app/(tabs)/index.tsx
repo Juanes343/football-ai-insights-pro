@@ -6,7 +6,7 @@ import { useLiveMatches } from '@/hooks/useMatches';
 import { useTopPredictions, useResults, type ResultItem } from '@/hooks/usePredictions';
 import { MatchCard } from '@/components/MatchCard';
 import { PredictionCard } from '@/components/PredictionCard';
-import { Card, Muted, Loading, Empty } from '@/components/ui';
+import { Card, Muted, Loading, Empty, SectionTitle, IconBadge } from '@/components/ui';
 import { theme } from '@/lib/theme';
 
 const SHORT: Record<string, string> = { HOME_WIN: 'Local', DRAW: 'Empate', AWAY_WIN: 'Visitante' };
@@ -29,33 +29,34 @@ export default function Panel() {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={{ padding: 16, gap: 16 }}
+      contentContainerStyle={{ padding: 16, gap: 18 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
     >
       {/* Stats */}
       <View style={styles.stats}>
-        <Stat label="En vivo" value={live.data?.length ?? '—'} color={theme.colors.red} />
+        <Stat icon="pulse" label="En vivo" value={live.data?.length ?? '—'} color={theme.colors.red} />
         <Stat
+          icon="trophy"
           label="Aciertos ayer"
           value={acc ? acc.correct : '—'}
           sub={acc && acc.total > 0 ? `de ${acc.total} · ${Math.round(acc.accuracy * 100)}%` : undefined}
           color={theme.colors.gold}
         />
-        <Stat label="Pronósticos" value={top.data?.length ?? '—'} color={theme.colors.blue} />
+        <Stat icon="sparkles" label="Pronósticos" value={top.data?.length ?? '—'} color={theme.colors.primary} />
       </View>
 
       {/* Mejor pronóstico */}
-      <Text style={styles.h2}>Mejor pronóstico</Text>
+      <SectionTitle gold>Mejor pronóstico</SectionTitle>
       {top.isLoading ? (
         <Loading />
       ) : top.data && top.data[0] ? (
-        <PredictionCard prediction={top.data[0]} />
+        <PredictionCard prediction={top.data[0]} accent="gold" />
       ) : (
         <Card><Empty>Aún no hay predicciones</Empty></Card>
       )}
 
       {/* Resultados de ayer */}
-      <Text style={styles.h2}>Resultados de ayer</Text>
+      <SectionTitle>Resultados de ayer</SectionTitle>
       {results.isLoading ? (
         <Loading />
       ) : acc && acc.items.length > 0 ? (
@@ -67,7 +68,7 @@ export default function Panel() {
       )}
 
       {/* En vivo */}
-      <Text style={styles.h2}>Partidos en vivo</Text>
+      <SectionTitle>Partidos en vivo</SectionTitle>
       {live.isLoading ? (
         <Loading />
       ) : live.data && live.data.length > 0 ? (
@@ -79,9 +80,22 @@ export default function Panel() {
   );
 }
 
-function Stat({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
+function Stat({
+  icon,
+  label,
+  value,
+  sub,
+  color,
+}: {
+  icon: any;
+  label: string;
+  value: string | number;
+  sub?: string;
+  color: string;
+}) {
   return (
     <Card style={styles.statCard}>
+      <IconBadge name={icon} color={color} size={16} />
       <Text style={[styles.statValue, { color }]}>{value}</Text>
       <Muted style={{ fontSize: 11, textAlign: 'center' }}>{label}</Muted>
       {sub ? <Text style={styles.statSub}>{sub}</Text> : null}
@@ -96,7 +110,7 @@ function ResultRow({ r }: { r: ResultItem }) {
       onPress={() => router.push(`/match/${r.externalId}`)}
       style={({ pressed }) => [styles.resRow, pressed && { opacity: 0.7 }]}
     >
-      <View style={[styles.resIcon, { backgroundColor: r.correct ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }]}>
+      <View style={[styles.resIcon, { backgroundColor: r.correct ? theme.colors.green + '22' : theme.colors.red + '22' }]}>
         <Text style={{ color: r.correct ? theme.colors.green : theme.colors.red, fontWeight: '800' }}>
           {r.correct ? '✓' : '✗'}
         </Text>
@@ -116,10 +130,9 @@ function ResultRow({ r }: { r: ResultItem }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   stats: { flexDirection: 'row', gap: 10 },
-  statCard: { flex: 1, alignItems: 'center', paddingVertical: 14 },
-  statValue: { fontSize: 26, fontWeight: '800' },
-  statSub: { color: theme.colors.muted, fontSize: 10, marginTop: 2 },
-  h2: { color: theme.colors.text, fontSize: 16, fontWeight: '700', marginTop: 4 },
+  statCard: { flex: 1, alignItems: 'center', paddingVertical: 14, gap: 6 },
+  statValue: { fontSize: 24, fontWeight: '800' },
+  statSub: { color: theme.colors.muted, fontSize: 10, marginTop: 1 },
   resRow: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, padding: 10 },
   resIcon: { width: 28, height: 28, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   resTeams: { color: theme.colors.text, fontSize: 13, fontWeight: '600' },

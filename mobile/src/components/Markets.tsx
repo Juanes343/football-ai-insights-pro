@@ -68,7 +68,8 @@ function MarketRow({ m }: { m: Market }) {
       <View style={styles.topRow}>
         <Text style={styles.label} numberOfLines={2}>{m.label}</Text>
         <View style={styles.oddsChip}>
-          <Text style={styles.oddsText}>@{m.odds.toFixed(2)}</Text>
+          <Ionicons name="cash-outline" size={11} color={theme.colors.gold} />
+          <Text style={styles.oddsText}>{m.odds.toFixed(2)}</Text>
         </View>
       </View>
 
@@ -77,7 +78,7 @@ function MarketRow({ m }: { m: Market }) {
           <View style={[styles.barFill, { width: `${pct}%`, backgroundColor: color }]} />
         </View>
         <Text style={[styles.pct, { color }]}>{pct}%</Text>
-        <View style={[styles.riskBadge, { borderColor: color }]}>
+        <View style={[styles.riskBadge, { borderColor: color, backgroundColor: color + '22' }]}>
           <Text style={[styles.riskText, { color }]}>{m.risk}</Text>
         </View>
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={14} color={theme.colors.muted} />
@@ -94,8 +95,8 @@ const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, padding: 12 },
   topRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
   label: { color: theme.colors.text, fontSize: 14, fontWeight: '600', flex: 1 },
-  oddsChip: { backgroundColor: theme.colors.cardAlt, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  oddsText: { color: theme.colors.text, fontSize: 12, fontWeight: '700' },
+  oddsChip: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: theme.colors.goldDim, borderColor: theme.colors.gold + '55', borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  oddsText: { color: theme.colors.gold, fontSize: 12, fontWeight: '800' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 },
   barTrack: { flex: 1, height: 7, borderRadius: 999, backgroundColor: theme.colors.cardAlt, overflow: 'hidden' },
   barFill: { height: '100%', borderRadius: 999 },
