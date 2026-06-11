@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop, Path, Line as SvgLine } from 'react-native-svg';
 import { theme, outcomeColor } from '@/lib/theme';
 import type { PredictionOutcome } from '@/types';
 
@@ -92,8 +92,69 @@ export function ProbBars1X2({
   );
 }
 
+/**
+ * Mini-gráfico de tendencia (estilo TradingView): área con degradado + línea
+ * + glow + punto final. `values` en 0..1. `gold` para tramo de alto valor.
+ */
+export function TrendChart({
+  values,
+  height = 130,
+  gold = false,
+  xLabels,
+}: {
+  values: number[];
+  height?: number;
+  gold?: boolean;
+  xLabels?: string[];
+}) {
+  const { width: winW } = useWindowDimensions();
+  const w = Math.max(220, winW - 64); // ancho de la tarjeta (padding pantalla 16 + card 16)
+  const padY = 14;
+  const h = height;
+  const color = gold ? theme.colors.gold : theme.colors.neural;
+  const n = values.length;
+  if (n < 2) return null;
+
+  const x = (i: number) => (i / (n - 1)) * w;
+  const y = (v: number) => h - padY - Math.max(0, Math.min(1, v)) * (h - padY * 2);
+
+  const line = values.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+  const area = `${line} L ${w} ${h} L 0 ${h} Z`;
+  const last = values[n - 1];
+
+  return (
+    <View>
+      <Svg width={w} height={h}>
+        <Defs>
+          <SvgGradient id="psai-area" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0%" stopColor={color} stopOpacity={0.35} />
+            <Stop offset="100%" stopColor={color} stopOpacity={0.02} />
+          </SvgGradient>
+        </Defs>
+        {/* líneas guía */}
+        {[0.25, 0.5, 0.75].map((g) => (
+          <SvgLine key={g} x1={0} y1={y(g)} x2={w} y2={y(g)} stroke={theme.colors.border} strokeWidth={1} strokeDasharray="3 5" />
+        ))}
+        <Path d={area} fill="url(#psai-area)" />
+        <Path d={line} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+        <Circle cx={x(n - 1)} cy={y(last)} r={5} fill={color} />
+        <Circle cx={x(n - 1)} cy={y(last)} r={9} fill={color} opacity={0.2} />
+      </Svg>
+      {xLabels && xLabels.length > 0 ? (
+        <View style={styles.xRow}>
+          {xLabels.map((l, i) => (
+            <Text key={i} style={styles.xLabel}>{l}</Text>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12 },
+  xRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
+  xLabel: { color: theme.colors.muted, fontSize: 10 },
   col: { flex: 1, alignItems: 'center', gap: 5 },
   pct: { fontSize: 17, fontWeight: '800' },
   pctActive: { fontSize: 19, fontWeight: '900' },

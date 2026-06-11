@@ -7,7 +7,7 @@ import { useMatchPrediction } from '@/hooks/usePredictions';
 import { PredictionCard } from '@/components/PredictionCard';
 import { MarketsList } from '@/components/Markets';
 import { NeuralBg } from '@/components/NeuralBg';
-import { ConfidenceRing, ProbBars1X2 } from '@/components/Charts';
+import { ConfidenceRing, ProbBars1X2, TrendChart } from '@/components/Charts';
 import { Card, Loading, Empty, Muted } from '@/components/ui';
 import { theme, statusLabel, outcomeLabel } from '@/lib/theme';
 
@@ -75,6 +75,29 @@ export default function MatchDetail() {
               />
             </Card>
 
+            {/* Tendencia de gol (mini-gráfico) */}
+            {(() => {
+              const eh = prediction.data.expectedHomeGoals ?? 0;
+              const ea = prediction.data.expectedAwayGoals ?? 0;
+              let lambda = eh + ea;
+              if (!lambda || lambda < 0.3) lambda = 1.3;
+              const mins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90];
+              const curve = mins.map((t) => 1 - Math.exp((-lambda * t) / 90));
+              const finalPct = Math.round((1 - Math.exp(-lambda)) * 100);
+              return (
+                <Card>
+                  <View style={styles.trendHead}>
+                    <Text style={styles.sectionTitle}>📈 Tendencia de gol</Text>
+                    <Text style={styles.trendPct}>{finalPct}%</Text>
+                  </View>
+                  <Muted style={{ fontSize: 11, marginBottom: 8 }}>
+                    Probabilidad de al menos 1 gol a lo largo del partido (modelo Poisson).
+                  </Muted>
+                  <TrendChart values={curve} xLabels={["0'", "45'", "90'"]} />
+                </Card>
+              );
+            })()}
+
             {/* Análisis general */}
             {prediction.data.analysis ? (
               <Card>
@@ -121,6 +144,8 @@ const styles = StyleSheet.create({
   predChip: { alignSelf: 'flex-start', marginTop: 4, backgroundColor: theme.colors.primaryDim, borderColor: theme.colors.primary, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
   predChipText: { color: theme.colors.primary, fontSize: 12, fontWeight: '800' },
   divider: { height: 1, backgroundColor: theme.colors.border, marginVertical: 14 },
+  trendHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  trendPct: { color: theme.colors.neural, fontSize: 22, fontWeight: '900' },
   status: { color: theme.colors.muted, fontSize: 12, textAlign: 'center', marginBottom: 12 },
   scoreRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   team: { flex: 1, alignItems: 'center', gap: 8 },
