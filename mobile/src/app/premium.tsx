@@ -1,10 +1,14 @@
-import { ScrollView, View, Text, Pressable, StyleSheet, Alert, Linking } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ScrollView, View, Text, Pressable, StyleSheet, Alert, Linking, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NeuralBg } from '@/components/NeuralBg';
 import { Card } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/auth';
+import { initPurchases, getPackages, purchase, restore, purchasesAvailable, type RCPackage } from '@/lib/purchases';
 import { theme } from '@/lib/theme';
 
 const BENEFITS = [
@@ -24,10 +28,60 @@ const WHATSAPP = '573000000000'; // TODO: reemplazar por el número real de sopo
 
 export default function Premium() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const isPremium = !!user?.isPremium;
+  const [packages, setPackages] = useState<RCPackage[]>([]);
+  const [busy, setBusy] = useState(false);
+  const billing = purchasesAvailable();
+
+  useEffect(() => {
+    if (!billing) return;
+    (async () => {
+      await initPurchases(user?.id);
+      setPackages(await getPackages());
+    })();
+  }, [billing, user?.id]);
+
+  const markPremium = () => {
+    if (user) useAuthStore.getState().setUser({ ...user, isPremium: true, role: 'PREMIUM' });
+    qc.invalidateQueries({ queryKey: ['me'] });
+  };
 
   const soon = () =>
     Alert.alert('Próximamente', 'Los pagos in-app estarán disponibles muy pronto. Estamos finalizando la integración con la tienda.');
+
+  const onBuy = async (pkg: RCPackage) => {
+    try {
+      setBusy(true);
+      const ok = await purchase(pkg);
+      if (ok) {
+        markPremium();
+        Alert.alert('¡Listo! 👑', 'Ya eres Premium. ¡Disfruta el acceso completo!');
+      }
+    } catch {
+      Alert.alert('Error', 'No se pudo completar la compra. Inténtalo de nuevo.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onRestore = async () => {
+    if (!billing) return soon();
+    try {
+      setBusy(true);
+      const ok = await restore();
+      if (ok) {
+        markPremium();
+        Alert.alert('Compras restauradas', 'Tu suscripción Premium está activa de nuevo.');
+      } else {
+        Alert.alert('Sin compras', 'No encontramos una suscripción activa para restaurar.');
+      }
+    } catch {
+      Alert.alert('Error', 'No se pudieron restaurar las compras.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -60,23 +114,46 @@ export default function Premium() {
         </Card>
 
         {/* Planes */}
-        <View style={styles.plans}>
-          {PLANS.map((p) => (
-            <View key={p.id} style={[styles.plan, p.best && styles.planBest]}>
-              {p.best ? <Text style={styles.bestTag}>MÁS POPULAR</Text> : null}
-              <Text style={styles.planName}>{p.name} <MaterialCommunityIcons name="crown" size={14} color={theme.colors.gold} /></Text>
-              <Text style={styles.planPrice}>{p.price}</Text>
-              <Text style={styles.planPeriod}>{p.period}</Text>
-              <Pressable onPress={soon} style={({ pressed }) => [pressed && { opacity: 0.85 }, { marginTop: 10 }]}>
-                <LinearGradient colors={theme.gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
-                  <Text style={styles.subBtnText}>Suscribirse</Text>
-                </LinearGradient>
-              </Pressable>
-            </View>
-          ))}
-        </View>
+        {isPremium ? null : billing && packages.length > 0 ? (
+          <View style={styles.plans}>
+            {packages.map((p, i) => {
+              const best = p.period === '/mes' || (packages.length === 2 && i === 1);
+              return (
+                <View key={p.id} style={[styles.plan, best && styles.planBest]}>
+                  {best ? <Text style={styles.bestTag}>MÁS POPULAR</Text> : null}
+                  <Text style={styles.planName}>{p.title} <MaterialCommunityIcons name="crown" size={14} color={theme.colors.gold} /></Text>
+                  <Text style={styles.planPrice}>{p.priceString}</Text>
+                  <Text style={styles.planPeriod}>{p.period}</Text>
+                  <Pressable disabled={busy} onPress={() => onBuy(p)} style={({ pressed }) => [pressed && { opacity: 0.85 }, { marginTop: 10 }]}>
+                    <LinearGradient colors={theme.gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
+                      <Text style={styles.subBtnText}>Suscribirse</Text>
+                    </LinearGradient>
+                  </Pressable>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.plans}>
+            {PLANS.map((p) => (
+              <View key={p.id} style={[styles.plan, p.best && styles.planBest]}>
+                {p.best ? <Text style={styles.bestTag}>MÁS POPULAR</Text> : null}
+                <Text style={styles.planName}>{p.name} <MaterialCommunityIcons name="crown" size={14} color={theme.colors.gold} /></Text>
+                <Text style={styles.planPrice}>{p.price}</Text>
+                <Text style={styles.planPeriod}>{p.period}</Text>
+                <Pressable onPress={soon} style={({ pressed }) => [pressed && { opacity: 0.85 }, { marginTop: 10 }]}>
+                  <LinearGradient colors={theme.gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
+                    <Text style={styles.subBtnText}>Suscribirse</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
 
-        <Pressable onPress={soon} style={({ pressed }) => [styles.restore, pressed && { opacity: 0.7 }]}>
+        {busy ? <ActivityIndicator color={theme.colors.primary} /> : null}
+
+        <Pressable onPress={onRestore} style={({ pressed }) => [styles.restore, pressed && { opacity: 0.7 }]}>
           <Ionicons name="refresh" size={16} color={theme.colors.text} />
           <Text style={styles.restoreText}>Restaurar compras</Text>
         </Pressable>

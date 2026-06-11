@@ -45,4 +45,41 @@ router.post('/stripe', async (req: Request, res: Response) => {
   res.json({ received: true });
 });
 
+/**
+ * Webhook de RevenueCat. Activa/desactiva el rol PREMIUM del usuario.
+ * Configura en RevenueCat → Project settings → Webhooks:
+ *   URL: https://<backend>/api/webhooks/revenuecat
+ *   Authorization header: Bearer <REVENUECAT_WEBHOOK_AUTH>
+ */
+router.post('/revenuecat', async (req: Request, res: Response) => {
+  const secret = process.env.REVENUECAT_WEBHOOK_AUTH;
+  if (secret && req.headers.authorization !== `Bearer ${secret}`) {
+    return res.status(401).json({ ok: false });
+  }
+
+  const event = (req.body && req.body.event) || {};
+  const appUserId: string | undefined = event.app_user_id;
+  const type: string = event.type || '';
+  const ACTIVE = ['INITIAL_PURCHASE', 'RENEWAL', 'PRODUCT_CHANGE', 'UNCANCELLATION', 'NON_RENEWING_PURCHASE'];
+
+  try {
+    if (appUserId) {
+      const user = await prisma.user.findUnique({ where: { id: appUserId } });
+      if (user && user.role !== 'ADMIN') {
+        if (ACTIVE.includes(type)) {
+          await prisma.user.update({ where: { id: user.id }, data: { role: 'PREMIUM' } });
+          logger.info(`RevenueCat: ${user.email} → PREMIUM (${type})`);
+        } else if (type === 'EXPIRATION') {
+          await prisma.user.update({ where: { id: user.id }, data: { role: 'USER' } });
+          logger.info(`RevenueCat: ${user.email} → USER (expirado)`);
+        }
+      }
+    }
+  } catch (err) {
+    logger.warn('RevenueCat webhook error:', err);
+  }
+
+  res.json({ ok: true });
+});
+
 export default router;
