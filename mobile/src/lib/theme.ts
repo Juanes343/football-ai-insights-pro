@@ -1,8 +1,8 @@
 /** Tema "ProSoccer AI": negro tecnológico + azul IA/neural + dorado premium. */
 export const theme = {
   colors: {
-    bg: '#05070D',            // negro tecnológico
-    bgElevated: '#0A1F44',    // azul profundo
+    bg: '#0a1d3d',            // azul navy profundo (base)
+    bgElevated: '#0e2a54',    // azul profundo elevado
     card: 'rgba(10,31,68,0.65)',   // glassmorphism
     cardAlt: 'rgba(10,31,68,0.45)',
     border: 'rgba(0,229,255,0.22)', // borde iluminado cian
