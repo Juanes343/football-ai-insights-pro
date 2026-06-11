@@ -44,6 +44,28 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
   }
 }
 
+/** Igual que authenticate pero NO falla si no hay token (carga el usuario si lo hay). */
+export async function optionalAuthenticate(req: Request, _res: Response, next: NextFunction) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      try {
+        const payload = jwt.verify(token, config.jwt.secret) as { userId: string };
+        const user = await prisma.user.findUnique({
+          where: { id: payload.userId },
+          select: { id: true, email: true, role: true },
+        });
+        if (user) req.user = user;
+      } catch {
+        // token inválido/expirado → continúa como invitado
+      }
+    }
+  } finally {
+    next();
+  }
+}
+
 export function requireRole(...roles: UserRole[]) {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {

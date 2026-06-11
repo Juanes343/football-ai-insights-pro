@@ -45,7 +45,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
 
     res.status(201).json({
       success: true,
-      data: { accessToken, refreshToken, user: { id: user.id, email: user.email, name: user.name, role: user.role } },
+      data: { accessToken, refreshToken, user: { id: user.id, email: user.email, name: user.name, role: user.role, isPremium: user.role !== 'USER' } },
     });
   } catch (err) {
     next(err);
@@ -73,7 +73,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     res.json({
       success: true,
-      data: { accessToken, refreshToken, user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar } },
+      data: { accessToken, refreshToken, user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar, isPremium: user.role !== 'USER' } },
     });
   } catch (err) {
     next(err);
@@ -119,7 +119,8 @@ export async function me(req: AuthRequest, res: Response, next: NextFunction) {
       select: { id: true, email: true, name: true, avatar: true, role: true, isEmailVerified: true, createdAt: true, subscription: { select: { status: true, currentPeriodEnd: true } } },
     });
     if (!user) throw new AppError('User not found', 404);
-    res.json({ success: true, data: user });
+    const subActive = user.subscription?.status === 'ACTIVE';
+    res.json({ success: true, data: { ...user, isPremium: user.role !== 'USER' || subActive } });
   } catch (err) {
     next(err);
   }

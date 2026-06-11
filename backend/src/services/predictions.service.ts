@@ -221,11 +221,12 @@ class PredictionsService {
   }
 
   /** Predicción del partido enriquecida con mercados (córners, faltas, tarjetas, etc.) y análisis. */
-  async getPredictionWithMarkets(fixtureId: number) {
+  async getPredictionWithMarkets(fixtureId: number, opts: { userId?: string; role?: string } = {}) {
     const prediction = await this.getPredictionForMatch(fixtureId);
     if (!prediction) return null;
     const serialized = serializePrediction(prediction);
 
+    let full: any = serialized;
     try {
       const matchData = await matchesService.getMatchById(fixtureId);
       if (matchData?.homeTeam && serialized.expectedHomeGoals != null) {
@@ -244,12 +245,51 @@ class PredictionsService {
           home,
           away,
         });
-        return { ...serialized, markets, analysis };
+        full = { ...serialized, markets, analysis };
       }
     } catch (err) {
       logger.warn('No se pudieron construir los mercados:', err);
     }
-    return serialized;
+
+    return this.applyGating(full, fixtureId, opts);
+  }
+
+  /** Límite gratis por día (predicciones completas distintas). */
+  private readonly FREE_DAILY = 2;
+
+  /**
+   * Restringe el contenido premium (mercados + análisis) a usuarios premium.
+   * Los usuarios free pueden desbloquear FREE_DAILY partidos completos por día.
+   */
+  private async applyGating(full: any, fixtureId: number, opts: { userId?: string; role?: string }) {
+    const premium = opts.role === 'PREMIUM' || opts.role === 'ADMIN';
+    if (premium) return { ...full, premium: true, locked: false };
+
+    let allowed = false;
+    let remaining = this.FREE_DAILY;
+
+    if (opts.userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: opts.userId },
+        select: { freeViewsDate: true, freeViewsIds: true },
+      });
+      const today = new Date().toISOString().slice(0, 10);
+      let ids = user?.freeViewsDate === today ? user?.freeViewsIds ?? [] : [];
+      const key = String(fixtureId);
+      if (ids.includes(key)) {
+        allowed = true;
+      } else if (ids.length < this.FREE_DAILY) {
+        ids = [...ids, key];
+        await prisma.user.update({ where: { id: opts.userId }, data: { freeViewsDate: today, freeViewsIds: ids } });
+        allowed = true;
+      }
+      remaining = Math.max(0, this.FREE_DAILY - ids.length);
+    }
+
+    if (allowed) return { ...full, premium: false, locked: false, freeRemaining: remaining };
+
+    // Bloqueado: ocultamos mercados y análisis (queda 1X2 + marcador básico).
+    return { ...full, markets: [], analysis: null, premium: false, locked: true, freeRemaining: 0 };
   }
 
   /** Determina el resultado (enum) a partir de las 3 probabilidades. */

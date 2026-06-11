@@ -4,10 +4,13 @@ import { AuthRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { prisma } from '../db/prisma';
 
-export async function getPredictionForMatch(req: Request, res: Response, next: NextFunction) {
+export async function getPredictionForMatch(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const matchId = parseInt(req.params.matchId);
-    const prediction = await predictionsService.getPredictionWithMarkets(matchId);
+    const prediction = await predictionsService.getPredictionWithMarkets(matchId, {
+      userId: req.user?.id,
+      role: req.user?.role,
+    });
     res.json({ success: true, data: prediction });
   } catch (err) { next(err); }
 }
