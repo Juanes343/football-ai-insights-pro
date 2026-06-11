@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link } from 'expo-router';
 import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,6 +16,7 @@ export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -30,7 +32,12 @@ export default function Register() {
         <Text style={styles.label}>Correo electrónico</Text>
         <TextInput style={styles.input} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="tucorreo@ejemplo.com" placeholderTextColor={theme.colors.muted} />
         <Text style={styles.label}>Contraseña</Text>
-        <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry placeholder="Mín. 8 caracteres" placeholderTextColor={theme.colors.muted} />
+        <View style={styles.passwordWrap}>
+          <TextInput style={styles.passwordInput} value={password} onChangeText={setPassword} secureTextEntry={!showPass} placeholder="Mín. 8 caracteres" placeholderTextColor={theme.colors.muted} />
+          <Pressable onPress={() => setShowPass((s) => !s)} hitSlop={10} style={styles.eyeBtn}>
+            <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={20} color={theme.colors.muted} />
+          </Pressable>
+        </View>
 
         {registerMutation.isError ? (
           <Text style={styles.error}>{apiErrorMessage(registerMutation.error, 'No se pudo crear la cuenta')}</Text>
@@ -64,6 +71,9 @@ const styles = StyleSheet.create({
   subtitle: { color: theme.colors.muted, fontSize: 13, textAlign: 'center', marginBottom: 20 },
   label: { color: theme.colors.muted, fontSize: 13, marginBottom: 6, marginTop: 12 },
   input: { backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, paddingHorizontal: 14, paddingVertical: 12, color: theme.colors.text },
+  passwordWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.card, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, paddingRight: 8 },
+  passwordInput: { flex: 1, paddingHorizontal: 14, paddingVertical: 12, color: theme.colors.text },
+  eyeBtn: { padding: 8 },
   error: { color: theme.colors.danger, fontSize: 13, marginTop: 12 },
   button: { borderRadius: theme.radius.md, paddingVertical: 15, alignItems: 'center', marginTop: 22 },
   buttonText: { color: theme.colors.onPrimary, fontSize: 15, fontWeight: '800' },
