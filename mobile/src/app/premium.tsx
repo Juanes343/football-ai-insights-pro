@@ -20,8 +20,8 @@ const BENEFITS = [
 ];
 
 const PLANS = [
-  { id: 'weekly', name: 'Semanal', price: '$19.900', period: '/semana' },
-  { id: 'monthly', name: 'Mensual', price: '$49.900', period: '/mes', best: true },
+  { id: 'weekly', name: 'Semanal', price: '$20.000', period: '/semana' },
+  { id: 'monthly', name: 'Mensual', price: '$50.000', period: '/mes', best: true },
 ];
 
 const WHATSAPP = '573000000000'; // TODO: reemplazar por el número real de soporte
@@ -33,12 +33,15 @@ export default function Premium() {
   const [packages, setPackages] = useState<RCPackage[]>([]);
   const [busy, setBusy] = useState(false);
   const billing = purchasesAvailable();
+  const [loadingPkgs, setLoadingPkgs] = useState(billing);
 
   useEffect(() => {
     if (!billing) return;
     (async () => {
+      setLoadingPkgs(true);
       await initPurchases(user?.id);
       setPackages(await getPackages());
+      setLoadingPkgs(false);
     })();
   }, [billing, user?.id]);
 
@@ -114,7 +117,12 @@ export default function Premium() {
         </Card>
 
         {/* Planes */}
-        {isPremium ? null : billing && packages.length > 0 ? (
+        {isPremium ? null : billing && loadingPkgs ? (
+          <View style={[styles.plans, { justifyContent: 'center', paddingVertical: 30 }]}>
+            <ActivityIndicator color={theme.colors.primary} />
+            <Text style={{ color: theme.colors.muted, marginLeft: 10 }}>Cargando planes…</Text>
+          </View>
+        ) : billing && packages.length > 0 ? (
           <View style={styles.plans}>
             {packages.map((p, i) => {
               const best = p.period === '/mes' || (packages.length === 2 && i === 1);
