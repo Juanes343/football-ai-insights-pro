@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
 import { apiErrorMessage } from '@/lib/api';
+import { NeuralBg } from '@/components/NeuralBg';
 import { theme } from '@/lib/theme';
 
 const LOGO = require('../../assets/images/logo.png');
@@ -18,7 +19,9 @@ export default function Login() {
   const [showPass, setShowPass] = useState(false);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={{ flex: 1 }}>
+      <NeuralBg />
+      <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
         <View style={styles.brandWrap}>
           <Image source={LOGO} style={styles.logoImg} contentFit="contain" />
@@ -52,6 +55,8 @@ export default function Login() {
           </Pressable>
         </View>
 
+        <Link href={'/forgot-password' as any} style={styles.forgot}>¿Olvidaste tu contraseña?</Link>
+
         {loginMutation.isError ? (
           <Text style={styles.error}>{apiErrorMessage(loginMutation.error, 'Credenciales inválidas')}</Text>
         ) : null}
@@ -71,13 +76,15 @@ export default function Login() {
           <Link href="/register" style={styles.link}>Crea una</Link>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.colors.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: { flex: 1, justifyContent: 'center', padding: 24 },
+  forgot: { color: theme.colors.primary, fontSize: 12, fontWeight: '600', textAlign: 'right', marginTop: 10 },
   brandWrap: { alignItems: 'center', marginBottom: 24, gap: 10 },
   logoImg: { width: 168, height: 168, borderRadius: 28 },
   tagline: { color: theme.colors.muted, fontSize: 12 },

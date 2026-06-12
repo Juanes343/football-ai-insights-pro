@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, View, Text, Pressable, StyleSheet, Alert, Linking, ActivityIndicator } from 'react-native';
-import { Stack } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -89,7 +88,6 @@ export default function Premium() {
   return (
     <View style={{ flex: 1 }}>
       <NeuralBg />
-      <Stack.Screen options={{ title: 'Premium' }} />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
         {/* Hero */}
         <View style={styles.hero}>

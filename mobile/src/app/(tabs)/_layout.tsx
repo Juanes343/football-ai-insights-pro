@@ -41,6 +41,10 @@ export default function TabsLayout() {
         options={{ title: 'Predicciones', tabBarIcon: ({ color, size }) => <Ionicons name="analytics-outline" color={color} size={size} /> }}
       />
       <Tabs.Screen
+        name="premium"
+        options={{ title: 'Premium', tabBarIcon: ({ color, size }) => <MaterialCommunityIcons name="crown" color={color} size={size} /> }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{ title: 'Perfil', tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" color={color} size={size} /> }}
       />

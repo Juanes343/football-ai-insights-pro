@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
 import { apiErrorMessage } from '@/lib/api';
+import { NeuralBg } from '@/components/NeuralBg';
 import { theme } from '@/lib/theme';
 
 const LOGO = require('../../assets/images/logo.png');
@@ -19,7 +20,9 @@ export default function Register() {
   const [showPass, setShowPass] = useState(false);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={{ flex: 1 }}>
+      <NeuralBg />
+      <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
         <View style={styles.brandWrap}>
           <Image source={LOGO} style={styles.logoImg} contentFit="contain" />
@@ -58,12 +61,13 @@ export default function Register() {
           <Link href="/login" style={styles.link}>Inicia sesión</Link>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.colors.bg },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: { flex: 1, justifyContent: 'center', padding: 24 },
   brandWrap: { alignItems: 'center', marginBottom: 12 },
   logoImg: { width: 96, height: 96, borderRadius: 18 },
