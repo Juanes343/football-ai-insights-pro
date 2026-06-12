@@ -20,8 +20,8 @@ const BENEFITS = [
 ];
 
 const PLANS = [
-  { id: 'weekly', name: 'Semanal', price: '$14.900', period: '/semana' },
-  { id: 'monthly', name: 'Mensual', price: '$39.900', period: '/mes', best: true },
+  { id: 'weekly', name: 'Semanal', price: '$19.900', period: '/semana' },
+  { id: 'monthly', name: 'Mensual', price: '$49.900', period: '/mes', best: true },
 ];
 
 const WHATSAPP = '573000000000'; // TODO: reemplazar por el número real de soporte
