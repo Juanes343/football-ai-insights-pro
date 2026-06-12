@@ -195,7 +195,8 @@ export async function googleCallback(req: AuthRequest, res: Response) {
     data: { token: refreshToken, userId: user.id, expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
   });
 
-  res.redirect(
-    `${config.app.frontendUrl}/auth/callback?token=${accessToken}&refresh=${refreshToken}`
-  );
+  // Redirige a la app móvil por deep link (configurable). El navegador de
+  // WebBrowser intercepta este esquema y devuelve los tokens a la app.
+  const mobileRedirect = process.env.MOBILE_AUTH_REDIRECT || 'footballai://auth';
+  res.redirect(`${mobileRedirect}?token=${accessToken}&refresh=${refreshToken}`);
 }

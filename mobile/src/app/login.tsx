@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Link } from 'expo-router';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +13,7 @@ import { theme } from '@/lib/theme';
 const LOGO = require('../../assets/images/logo.png');
 
 export default function Login() {
-  const { loginMutation } = useAuth();
+  const { loginMutation, googleSignIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -71,6 +71,23 @@ export default function Login() {
           </LinearGradient>
         </Pressable>
 
+        <View style={styles.dividerRow}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>o</Text>
+          <View style={styles.line} />
+        </View>
+
+        <Pressable
+          onPress={async () => {
+            const r = await googleSignIn();
+            if (r.error) Alert.alert('Google', r.error);
+          }}
+          style={({ pressed }) => [styles.googleBtn, pressed && { opacity: 0.85 }]}
+        >
+          <Ionicons name="logo-google" size={18} color="#EA4335" />
+          <Text style={styles.googleText}>Continuar con Google</Text>
+        </Pressable>
+
         <View style={styles.footer}>
           <Text style={styles.muted}>¿No tienes cuenta? </Text>
           <Link href="/register" style={styles.link}>Crea una</Link>
@@ -98,6 +115,11 @@ const styles = StyleSheet.create({
   error: { color: theme.colors.danger, fontSize: 13, marginTop: 12 },
   button: { borderRadius: theme.radius.md, paddingVertical: 15, alignItems: 'center', marginTop: 22 },
   buttonText: { color: theme.colors.onPrimary, fontSize: 15, fontWeight: '800' },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 18 },
+  line: { flex: 1, height: 1, backgroundColor: theme.colors.border },
+  orText: { color: theme.colors.muted, fontSize: 12 },
+  googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#fff', borderRadius: theme.radius.md, paddingVertical: 14, marginTop: 18 },
+  googleText: { color: '#1f1f1f', fontSize: 14, fontWeight: '700' },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
   muted: { color: theme.colors.muted, fontSize: 13 },
   link: { color: theme.colors.primary, fontSize: 13, fontWeight: '600' },
