@@ -18,7 +18,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://football-backend-4pqt.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://football-backend-4pqt.onrender.com/api",
+        "EXPO_PUBLIC_RC_ANDROID_KEY": "goog_qCamhzgaDVuUeLyNoxUTMxaFwmQ"
       }
     },
     "production": {
@@ -28,7 +29,8 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://football-backend-4pqt.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://football-backend-4pqt.onrender.com/api",
+        "EXPO_PUBLIC_RC_ANDROID_KEY": "goog_qCamhzgaDVuUeLyNoxUTMxaFwmQ"
       }
     }
   },
