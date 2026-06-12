@@ -169,9 +169,9 @@ export default function Premium() {
         </Text>
 
         <View style={styles.links}>
-          <Text style={styles.link} onPress={() => Linking.openURL('https://prosocceria.app/terminos')}>Términos de uso</Text>
+          <Text style={styles.link} onPress={() => Linking.openURL('https://juanes343.github.io/football-ai-insights-pro/terminos.html')}>Términos de uso</Text>
           <Text style={styles.dot}>·</Text>
-          <Text style={styles.link} onPress={() => Linking.openURL('https://prosocceria.app/privacidad')}>Política de privacidad</Text>
+          <Text style={styles.link} onPress={() => Linking.openURL('https://juanes343.github.io/football-ai-insights-pro/privacidad.html')}>Política de privacidad</Text>
         </View>
 
         <Pressable
